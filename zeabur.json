@@ -1,0 +1,13 @@
+{
+    "build": {
+        "type": "nodejs"
+    },
+    "start": {
+        "command": "npm start"
+    },
+    "env": {
+        "PORT": "8080",
+        "DATA_PATH": "/app/data",
+        "CONFIG_PATH": "/app/data/config"
+    }
+}

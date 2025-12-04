@@ -1,0 +1,68 @@
+{
+    "_version": "1.0",
+    "_description": "AI 模型配置 - 從 V7.6.8 提取",
+    "_lastModified": "2025-12-05T00:00:00Z",
+    
+    "models": [
+        {
+            "id": "147-gemini-2.5-pro",
+            "name": "147 Gemini 2.5 Pro",
+            "endpoint": "https://147ai.com/v1/chat/completions",
+            "apiKey": "sk-eifSWoyjAe1nEchtGQODv3TsxhOpAmI4QnWPKUopV1YTNga0",
+            "modelId": "gemini-2.5-pro",
+            "maxTokens": null,
+            "temperature": null,
+            "description": "147AI Gemini 2.5 Pro（推薦）",
+            "enabled": true
+        },
+        {
+            "id": "n1n-gemini-2.5-pro",
+            "name": "N1N Gemini 2.5 Pro",
+            "endpoint": "https://n1n.ai/v1/chat/completions",
+            "apiKey": "sk-3ngcgQiVLBhYlaWVaRlLZH3uTv31moqejWpztivHkPGhvrRq",
+            "modelId": "gemini-2.5-pro",
+            "maxTokens": null,
+            "temperature": null,
+            "description": "N1N Gemini 2.5 Pro",
+            "enabled": true
+        },
+        {
+            "id": "gpt-4o-2024-08-06",
+            "name": "GPT-4o (2024-08-06)",
+            "endpoint": "https://n1n.ai/v1/chat/completions",
+            "apiKey": "sk-3ngcgQiVLBhYlaWVaRlLZH3uTv31moqejWpztivHkPGhvrRq",
+            "modelId": "gpt-4o-2024-08-06",
+            "maxTokens": 65536,
+            "temperature": null,
+            "description": "長輸出 65K（穩定推薦）",
+            "enabled": true
+        },
+        {
+            "id": "gpt-4o-mini",
+            "name": "GPT-4o Mini",
+            "endpoint": "https://n1n.ai/v1/chat/completions",
+            "apiKey": "sk-3ngcgQiVLBhYlaWVaRlLZH3uTv31moqejWpztivHkPGhvrRq",
+            "modelId": "gpt-4o-mini",
+            "maxTokens": 65536,
+            "temperature": null,
+            "description": "快速便宜版本",
+            "enabled": true
+        },
+        {
+            "id": "gemini-2.0-flash-exp",
+            "name": "Gemini 2.0 Flash",
+            "endpoint": "https://n1n.ai/v1/chat/completions",
+            "apiKey": "sk-DXzVChXdpQ3GvmTZ0qTXs6EXKlswiO08Q1Oh44fDl7YcE6z8",
+            "modelId": "gemini-2.0-flash-exp",
+            "maxTokens": 500000,
+            "temperature": null,
+            "description": "超長上下文（推薦長音頻）",
+            "enabled": true
+        }
+    ],
+    
+    "defaults": {
+        "matching": "147-gemini-2.5-pro",
+        "correction": "147-gemini-2.5-pro"
+    }
+}

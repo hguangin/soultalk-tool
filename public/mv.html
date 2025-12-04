@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MV 模式 - SoulTalk Tool v2.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .header h1 {
+            font-size: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-left: 20px;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover { color: #fff; }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 350px;
+            gap: 20px;
+            min-height: calc(100vh - 100px);
+        }
+        
+        @media (max-width: 1200px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .panel {
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .panel-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            color: #fff;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, #f093fb, #f5576c);
+            color: #fff;
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        
+        .btn-full {
+            width: 100%;
+            justify-content: center;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        /* 步驟指示器 */
+        .steps {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.4);
+            font-size: 13px;
+        }
+        
+        .step.active {
+            color: #667eea;
+        }
+        
+        .step.completed {
+            color: #38ef7d;
+        }
+        
+        .step-num {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .step.active .step-num {
+            background: #667eea;
+            color: #fff;
+        }
+        
+        .step.completed .step-num {
+            background: #38ef7d;
+            color: #000;
+        }
+        
+        /* 預覽區域 */
+        .preview-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        
+        .preview-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .preview-subtitle {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 24px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            white-space: nowrap;
+        }
+        
+        .preview-title {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        
+        .preview-title h2 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .preview-title p {
+            font-size: 18px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        /* 歌詞編輯器 */
+        .lyrics-editor {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .lyrics-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            margin-bottom: 5px;
+            font-size: 13px;
+        }
+        
+        .lyrics-line:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+        
+        .lyrics-time {
+            color: #667eea;
+            font-family: monospace;
+            min-width: 100px;
+        }
+        
+        .lyrics-text {
+            flex: 1;
+        }
+        
+        .lyrics-chars {
+            color: rgba(255,255,255,0.5);
+            font-size: 11px;
+        }
+        
+        /* 狀態訊息 */
+        .status-bar {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .status-bar.success { background: #38ef7d; color: #000; display: block; }
+        .status-bar.error { background: #f5576c; color: #fff; display: block; }
+        .status-bar.loading { background: #667eea; color: #fff; display: block; }
+        
+        /* 載入動畫 */
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 資訊卡片 */
+        .info-card {
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 4px 0;
+        }
+        
+        .info-row .label {
+            color: rgba(255,255,255,0.6);
+        }
+        
+        .info-row .value {
+            color: #fff;
+            font-weight: 500;
+        }
+        
+        /* JSON 預覽 */
+        .json-preview {
+            background: #000;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 11px;
+            max-height: 300px;
+            overflow: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        /* 圖片列表 */
+        .image-list {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .image-thumb {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .image-thumb:hover {
+            border-color: #667eea;
+        }
+        
+        .image-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-thumb.selected {
+            border-color: #38ef7d;
+        }
+        
+        /* 進度條 */
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+        
+        /* 標籤 */
+        .tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-right: 5px;
+        }
+        
+        .tag-purple { background: rgba(102, 126, 234, 0.3); color: #667eea; }
+        .tag-green { background: rgba(56, 239, 125, 0.3); color: #38ef7d; }
+        .tag-orange { background: rgba(245, 87, 108, 0.3); color: #f5576c; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>🎬 MV 模式</h1>
+        <nav class="nav-links">
+            <a href="/">🏠 主頁</a>
+            <a href="/audio.html">🎙️ 語音模式</a>
+            <a href="/settings.html">⚙️ 設定</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <!-- 步驟指示器 -->
+        <div class="steps">
+            <div class="step active" id="step1">
+                <span class="step-num">1</span>
+                <span>載入資料</span>
+            </div>
+            <div class="step" id="step2">
+                <span class="step-num">2</span>
+                <span>語音識別</span>
+            </div>
+            <div class="step" id="step3">
+                <span class="step-num">3</span>
+                <span>AI 匹配</span>
+            </div>
+            <div class="step" id="step4">
+                <span class="step-num">4</span>
+                <span>預覽調整</span>
+            </div>
+            <div class="step" id="step5">
+                <span class="step-num">5</span>
+                <span>上傳</span>
+            </div>
+        </div>
+        
+        <div class="main-grid">
+            <!-- 左側面板：資料輸入 -->
+            <div class="left-panel">
+                <div class="panel">
+                    <div class="panel-title">📥 載入資料</div>
+                    
+                    <div class="form-group">
+                        <label>Ragic 代碼</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="ragicCode" placeholder="輸入代碼...">
+                            <button class="btn btn-primary" onclick="loadFromRagic()">載入</button>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card" id="dataInfo" style="display: none;">
+                        <div class="info-row">
+                            <span class="label">姓名</span>
+                            <span class="value" id="infoName">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">地區</span>
+                            <span class="value" id="infoRegion">-</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="label">音樂連結</span>
+                            <span class="value" id="infoMusic">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">🎵 音頻來源</div>
+                    
+                    <div class="form-group">
+                        <label>音頻 URL</label>
+                        <input type="text" id="audioUrl" placeholder="MP3 或音頻連結">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>或上傳音頻</label>
+                        <input type="file" id="audioFile" accept="audio/*">
+                    </div>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">📝 歌詞</div>
+                    
+                    <div class="form-group">
+                        <label>原始歌詞</label>
+                        <textarea id="originalLyrics" rows="8" placeholder="貼上歌詞..."></textarea>
+                    </div>
+                    
+                    <div class="info-row" style="font-size: 12px; color: rgba(255,255,255,0.5);">
+                        <span>總行數：<span id="lyricsLineCount">0</span></span>
+                        <span>總字數：<span id="lyricsCharCount">0</span></span>
+                    </div>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">⚙️ 設定</div>
+                    
+                    <div class="form-group">
+                        <label>語音識別 API</label>
+                        <select id="transcriptionApi">
+                            <option value="auto">自動選擇（根據地區）</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>AI 模型</label>
+                        <select id="aiModel">
+                            <option value="auto">自動選擇</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中間面板：預覽 -->
+            <div class="center-panel">
+                <div class="panel" style="height: 100%;">
+                    <div class="panel-title">
+                        🎬 預覽
+                        <div style="margin-left: auto; display: flex; gap: 10px;">
+                            <button class="btn btn-secondary" onclick="toggleFullscreen()">⛶</button>
+                        </div>
+                    </div>
+                    
+                    <div class="preview-container" id="previewContainer">
+                        <video id="previewVideo" controls></video>
+                        <div class="preview-title" id="previewTitle" style="display: none;">
+                            <h2 id="titleText">歌曲名稱</h2>
+                            <p id="artistText">演唱者</p>
+                        </div>
+                        <div class="preview-subtitle" id="previewSubtitle"></div>
+                    </div>
+                    
+                    <div class="btn-group" style="margin-bottom: 15px;">
+                        <button class="btn btn-primary" onclick="startTranscription()" id="btnTranscribe">
+                            🎤 開始識別
+                        </button>
+                        <button class="btn btn-success" onclick="startMatching()" id="btnMatch" disabled>
+                            🤖 AI 匹配
+                        </button>
+                        <button class="btn btn-warning" onclick="correctSubtitles()" id="btnCorrect" disabled>
+                            ✏️ 校正
+                        </button>
+                    </div>
+                    
+                    <div class="progress-bar" id="progressBar" style="display: none;">
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                    <div id="progressText" style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 15px;"></div>
+                    
+                    <!-- 字幕列表 -->
+                    <div class="panel-title" style="margin-top: 20px;">📜 字幕時間軸</div>
+                    <div class="lyrics-editor" id="lyricsEditor">
+                        <div style="color: rgba(255,255,255,0.5); text-align: center; padding: 30px;">
+                            尚未生成字幕
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 右側面板：輸出 -->
+            <div class="right-panel">
+                <div class="panel">
+                    <div class="panel-title">🖼️ 圖片素材</div>
+                    <div class="image-list" id="imageList">
+                        <div style="grid-column: 1/-1; color: rgba(255,255,255,0.5); text-align: center; padding: 20px;">
+                            載入資料後顯示圖片
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">🎨 樣式設定</div>
+                    
+                    <div class="form-group">
+                        <label>歌曲標題</label>
+                        <input type="text" id="songTitle" placeholder="歌曲名稱">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>演唱者</label>
+                        <input type="text" id="songArtist" placeholder="演唱者名稱">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>標題顯示時間（秒）</label>
+                        <input type="number" id="titleDuration" value="12">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>字體大小</label>
+                        <input type="range" id="fontSize" min="16" max="48" value="36">
+                        <span id="fontSizeValue">36px</span>
+                    </div>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">📤 輸出</div>
+                    
+                    <button class="btn btn-success btn-full" onclick="uploadToRagic()" id="btnUpload" disabled style="margin-bottom: 10px;">
+                        ⬆️ 上傳到 Ragic
+                    </button>
+                    
+                    <button class="btn btn-secondary btn-full" onclick="downloadJson()" id="btnDownload" disabled style="margin-bottom: 10px;">
+                        💾 下載 JSON
+                    </button>
+                    
+                    <button class="btn btn-secondary btn-full" onclick="copyJson()" id="btnCopy" disabled>
+                        📋 複製 JSON
+                    </button>
+                </div>
+                
+                <div class="panel" style="margin-top: 15px;">
+                    <div class="panel-title">📄 JSON 預覽</div>
+                    <div class="json-preview" id="jsonPreview">
+                        尚未生成 JSON
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 狀態訊息 -->
+    <div class="status-bar" id="statusBar"></div>
+    
+    <script>
+        // ==================== 全域變數 ====================
+        let currentData = null;          // 從 Ragic 載入的資料
+        let transcriptionResult = null;  // 語音識別結果
+        let matchedSubtitles = null;     // AI 匹配結果
+        let finalJson = null;            // 最終 JSON
+        let currentStep = 1;
+        
+        // ==================== 初始化 ====================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSettings();
+            
+            // 檢查 URL 參數
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
+            if (code) {
+                document.getElementById('ragicCode').value = code;
+                loadFromRagic();
+            }
+            
+            // 綁定事件
+            document.getElementById('originalLyrics').addEventListener('input', updateLyricsCount);
+            document.getElementById('fontSize').addEventListener('input', updateFontSize);
+            document.getElementById('previewVideo').addEventListener('timeupdate', updateSubtitleDisplay);
+        });
+        
+        // ==================== 載入設定 ====================
+        async function loadSettings() {
+            try {
+                // 載入語音識別 API
+                const transRes = await fetch('/api/config/transcription-apis');
+                const transData = await transRes.json();
+                const transSelect = document.getElementById('transcriptionApi');
+                transData.apis?.forEach(api => {
+                    const opt = document.createElement('option');
+                    opt.value = api.id;
+                    opt.textContent = api.name;
+                    transSelect.appendChild(opt);
+                });
+                
+                // 載入 AI 模型
+                const aiRes = await fetch('/api/config/ai-models');
+                const aiData = await aiRes.json();
+                const aiSelect = document.getElementById('aiModel');
+                aiData.models?.forEach(model => {
+                    const opt = document.createElement('option');
+                    opt.value = model.id;
+                    opt.textContent = model.name;
+                    aiSelect.appendChild(opt);
+                });
+                
+            } catch (error) {
+                console.error('載入設定失敗:', error);
+            }
+        }
+        
+        // ==================== 從 Ragic 載入 ====================
+        async function loadFromRagic() {
+            const code = document.getElementById('ragicCode').value.trim();
+            if (!code) {
+                showStatus('error', '請輸入 Ragic 代碼');
+                return;
+            }
+            
+            showStatus('loading', '正在載入資料...');
+            
+            try {
+                const response = await fetch(`/api/mv/fetch/${code}`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw new Error(result.error || '載入失敗');
+                }
+                
+                currentData = result.data;
+                
+                // 更新資訊顯示
+                document.getElementById('dataInfo').style.display = 'block';
+                document.getElementById('infoName').textContent = currentData.name || '-';
+                document.getElementById('infoRegion').textContent = currentData.region || '-';
+                document.getElementById('infoMusic').textContent = currentData.musicUrl ? '✓ 已取得' : '✗ 無';
+                
+                // 填入資料
+                if (currentData.musicUrl) {
+                    document.getElementById('audioUrl').value = currentData.musicUrl;
+                    document.getElementById('previewVideo').src = currentData.musicUrl;
+                }
+                
+                if (currentData.lyrics) {
+                    document.getElementById('originalLyrics').value = currentData.lyrics;
+                    updateLyricsCount();
+                }
+                
+                if (currentData.name) {
+                    document.getElementById('songTitle').value = currentData.name + ' 專屬歌曲';
+                    document.getElementById('songArtist').value = 'AI 演唱';
+                }
+                
+                // 更新圖片列表
+                if (currentData.images && currentData.images.length > 0) {
+                    updateImageList(currentData.images);
+                }
+                
+                updateStep(1, 'completed');
+                showStatus('success', '✅ 資料載入成功');
+                
+            } catch (error) {
+                if (error.error) {
+                    showDetailedError(error.error);
+                } else {
+                    showDetailedError({ message: error.message || '載入失敗' });
+                }
+            }
+        }
+        
+        // ==================== 語音識別 ====================
+        async function startTranscription() {
+            const audioUrl = document.getElementById('audioUrl').value.trim();
+            const audioFile = document.getElementById('audioFile').files[0];
+            
+            if (!audioUrl && !audioFile) {
+                showStatus('error', '請提供音頻來源');
+                return;
+            }
+            
+            showStatus('loading', '🎤 正在進行語音識別...');
+            showProgress(true);
+            document.getElementById('btnTranscribe').disabled = true;
+            
+            try {
+                const formData = new FormData();
+                
+                if (audioFile) {
+                    formData.append('audio', audioFile);
+                } else {
+                    formData.append('audioUrl', audioUrl);
+                }
+                
+                formData.append('region', currentData?.region || '台灣');
+                formData.append('apiId', document.getElementById('transcriptionApi').value);
+                
+                const response = await fetch('/api/mv/transcribe', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw result.error || { message: '識別失敗' };
+                }
+                
+                transcriptionResult = result.data;
+                
+                updateStep(2, 'completed');
+                document.getElementById('btnMatch').disabled = false;
+                showProgress(false);
+                showStatus('success', `✅ 識別完成！共 ${transcriptionResult.words?.length || 0} 個詞`);
+                
+            } catch (error) {
+                showDetailedError(error);
+                showProgress(false);
+            } finally {
+                document.getElementById('btnTranscribe').disabled = false;
+            }
+        }
+        
+        // ==================== AI 匹配 ====================
+        async function startMatching() {
+            if (!transcriptionResult) {
+                showStatus('error', '請先進行語音識別');
+                return;
+            }
+            
+            const lyrics = document.getElementById('originalLyrics').value.trim();
+            if (!lyrics) {
+                showStatus('error', '請輸入歌詞');
+                return;
+            }
+            
+            showStatus('loading', '🤖 AI 正在匹配時間軸...');
+            showProgress(true);
+            document.getElementById('btnMatch').disabled = true;
+            
+            try {
+                const response = await fetch('/api/mv/match', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        lyrics: lyrics,
+                        transcription: transcriptionResult,
+                        modelId: document.getElementById('aiModel').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw result.error || { message: '匹配失敗' };
+                }
+                
+                matchedSubtitles = result.data;
+                
+                // 更新字幕編輯器
+                updateLyricsEditor(matchedSubtitles);
+                
+                // 更新 JSON 預覽
+                updateJsonPreview();
+                
+                updateStep(3, 'completed');
+                updateStep(4, 'active');
+                document.getElementById('btnCorrect').disabled = false;
+                document.getElementById('btnUpload').disabled = false;
+                document.getElementById('btnDownload').disabled = false;
+                document.getElementById('btnCopy').disabled = false;
+                
+                showProgress(false);
+                showStatus('success', `✅ 匹配完成！共 ${matchedSubtitles.length} 行字幕`);
+                
+            } catch (error) {
+                showDetailedError(error);
+                showProgress(false);
+            } finally {
+                document.getElementById('btnMatch').disabled = false;
+            }
+        }
+        
+        // ==================== 校正 ====================
+        async function correctSubtitles() {
+            if (!matchedSubtitles) {
+                showStatus('error', '請先進行 AI 匹配');
+                return;
+            }
+            
+            showStatus('loading', '✏️ 正在校正字幕...');
+            document.getElementById('btnCorrect').disabled = true;
+            
+            try {
+                const response = await fetch('/api/correct', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        subtitles: matchedSubtitles,
+                        mode: 'mv',
+                        modelId: document.getElementById('aiModel').value
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw result.error || { message: '校正失敗' };
+                }
+                
+                matchedSubtitles = result.data;
+                updateLyricsEditor(matchedSubtitles);
+                updateJsonPreview();
+                
+                showStatus('success', '✅ 校正完成');
+                
+            } catch (error) {
+                showDetailedError(error);
+            } finally {
+                document.getElementById('btnCorrect').disabled = false;
+            }
+        }
+        
+        // ==================== 上傳到 Ragic ====================
+        async function uploadToRagic() {
+            if (!finalJson) {
+                showStatus('error', '請先生成 JSON');
+                return;
+            }
+            
+            const code = document.getElementById('ragicCode').value.trim();
+            if (!code) {
+                showStatus('error', '請輸入 Ragic 代碼');
+                return;
+            }
+            
+            showStatus('loading', '⬆️ 正在上傳到 Ragic...');
+            document.getElementById('btnUpload').disabled = true;
+            
+            try {
+                const response = await fetch('/api/mv/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        code: code,
+                        json: finalJson
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (!result.success) {
+                    throw result.error || { message: '上傳失敗' };
+                }
+                
+                updateStep(5, 'completed');
+                showStatus('success', '✅ 上傳成功！');
+                
+            } catch (error) {
+                showDetailedError(error);
+            } finally {
+                document.getElementById('btnUpload').disabled = false;
+            }
+        }
+        
+        // ==================== 輔助函數 ====================
+        
+        function updateLyricsCount() {
+            const lyrics = document.getElementById('originalLyrics').value;
+            const lines = lyrics.split('\n').filter(l => l.trim());
+            const chars = lyrics.replace(/\s/g, '').length;
+            
+            document.getElementById('lyricsLineCount').textContent = lines.length;
+            document.getElementById('lyricsCharCount').textContent = chars;
+        }
+        
+        function updateFontSize() {
+            const size = document.getElementById('fontSize').value;
+            document.getElementById('fontSizeValue').textContent = size + 'px';
+            document.getElementById('previewSubtitle').style.fontSize = size + 'px';
+        }
+        
+        function updateStep(stepNum, status) {
+            const step = document.getElementById('step' + stepNum);
+            step.className = 'step ' + status;
+        }
+        
+        function showStatus(type, message) {
+            const bar = document.getElementById('statusBar');
+            bar.className = 'status-bar ' + type;
+            bar.innerHTML = type === 'loading' 
+                ? `<span class="loading-spinner"></span> ${message}`
+                : message;
+            
+            if (type !== 'loading') {
+                setTimeout(() => { bar.className = 'status-bar'; }, 5000);
+            }
+        }
+        
+        // 顯示詳細錯誤
+        function showDetailedError(error) {
+            let message = `❌ ${error.message || error}`;
+            
+            // 如果有詳細錯誤資訊
+            if (error.code) {
+                message = `❌ [${error.code}] ${error.message}`;
+            }
+            
+            // 顯示建議
+            if (error.suggestions && error.suggestions.length > 0) {
+                message += '\n\n💡 建議：\n' + error.suggestions.map(s => `• ${s}`).join('\n');
+            }
+            
+            // 顯示詳細資訊
+            if (error.details) {
+                console.error('錯誤詳細資訊:', error.details);
+            }
+            
+            showStatus('error', message.replace(/\n/g, '<br>'));
+            
+            // 同時在控制台輸出完整錯誤
+            console.error('完整錯誤:', error);
+        }
+        
+        function showProgress(show) {
+            document.getElementById('progressBar').style.display = show ? 'block' : 'none';
+        }
+        
+        function updateImageList(images) {
+            const container = document.getElementById('imageList');
+            container.innerHTML = images.map((img, i) => `
+                <div class="image-thumb" onclick="selectImage(${i})">
+                    <img src="${img.url}" alt="${img.name || '圖片'}">
+                </div>
+            `).join('');
+        }
+        
+        function selectImage(index) {
+            document.querySelectorAll('.image-thumb').forEach((el, i) => {
+                el.classList.toggle('selected', i === index);
+            });
+        }
+        
+        function updateLyricsEditor(subtitles) {
+            const container = document.getElementById('lyricsEditor');
+            
+            if (!subtitles || subtitles.length === 0) {
+                container.innerHTML = '<div style="color: rgba(255,255,255,0.5); text-align: center; padding: 30px;">尚未生成字幕</div>';
+                return;
+            }
+            
+            container.innerHTML = subtitles.map((sub, i) => {
+                const startTime = formatTime(sub.startTime || sub.start || 0);
+                const endTime = formatTime(sub.endTime || sub.end || 0);
+                const text = sub.text || sub.content || '';
+                
+                return `
+                    <div class="lyrics-line" data-index="${i}" onclick="seekTo(${sub.startTime || sub.start || 0})">
+                        <span class="lyrics-time">${startTime} - ${endTime}</span>
+                        <span class="lyrics-text">${text}</span>
+                        <span class="lyrics-chars">${text.length}字</span>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            const ms = Math.floor((seconds % 1) * 100);
+            return `${mins}:${secs.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}`;
+        }
+        
+        function seekTo(time) {
+            const video = document.getElementById('previewVideo');
+            video.currentTime = time;
+        }
+        
+        function updateSubtitleDisplay() {
+            const video = document.getElementById('previewVideo');
+            const currentTime = video.currentTime;
+            const subtitleEl = document.getElementById('previewSubtitle');
+            
+            if (!matchedSubtitles) {
+                subtitleEl.textContent = '';
+                return;
+            }
+            
+            const currentSub = matchedSubtitles.find(sub => {
+                const start = sub.startTime || sub.start || 0;
+                const end = sub.endTime || sub.end || 0;
+                return currentTime >= start && currentTime <= end;
+            });
+            
+            subtitleEl.textContent = currentSub ? (currentSub.text || currentSub.content || '') : '';
+        }
+        
+        function updateJsonPreview() {
+            // 建立完整的 JSON 結構
+            finalJson = {
+                title: document.getElementById('songTitle').value || '未命名',
+                artist: document.getElementById('songArtist').value || '',
+                titleDuration: parseInt(document.getElementById('titleDuration').value) || 12,
+                subtitles: matchedSubtitles,
+                images: currentData?.images || [],
+                styles: {
+                    fontSize: parseInt(document.getElementById('fontSize').value) || 36
+                },
+                _generatedAt: new Date().toISOString(),
+                _mode: 'mv'
+            };
+            
+            document.getElementById('jsonPreview').textContent = JSON.stringify(finalJson, null, 2);
+        }
+        
+        function downloadJson() {
+            if (!finalJson) return;
+            
+            const blob = new Blob([JSON.stringify(finalJson, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `mv-${document.getElementById('ragicCode').value || 'output'}-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showStatus('success', '✅ JSON 已下載');
+        }
+        
+        function copyJson() {
+            if (!finalJson) return;
+            
+            navigator.clipboard.writeText(JSON.stringify(finalJson, null, 2)).then(() => {
+                showStatus('success', '✅ JSON 已複製到剪貼簿');
+            });
+        }
+        
+        function toggleFullscreen() {
+            const container = document.getElementById('previewContainer');
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                container.requestFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>

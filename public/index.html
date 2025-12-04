@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoulTalk Tool v2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* 頂部導航 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        /* 模式選擇卡片 */
+        .mode-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .mode-card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mode-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(255,255,255,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .mode-card.mv {
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.1));
+        }
+        
+        .mode-card.audio {
+            background: linear-gradient(135deg, rgba(76,175,80,0.2), rgba(46,125,50,0.1));
+        }
+        
+        .mode-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+        
+        .mode-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .mode-desc {
+            color: rgba(255,255,255,0.7);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .mode-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+        
+        .mode-features li {
+            padding: 8px 0;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .mode-features li::before {
+            content: '✓';
+            color: #4caf50;
+            margin-right: 10px;
+        }
+        
+        .mode-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        
+        .mode-card.mv .mode-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+        }
+        
+        .mode-card.audio .mode-btn {
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: #fff;
+        }
+        
+        .mode-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        /* Ragic 快速輸入 */
+        .quick-input {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+        
+        .quick-input h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        
+        .input-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .input-row input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .input-row input::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+        
+        .input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .input-row button {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .input-row button:hover {
+            transform: scale(1.05);
+        }
+        
+        /* 狀態區 */
+        .status-area {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+        }
+        
+        .status-area.show {
+            display: block;
+        }
+        
+        .status-area.success {
+            background: rgba(76,175,80,0.2);
+            border: 1px solid #4caf50;
+        }
+        
+        .status-area.error {
+            background: rgba(244,67,54,0.2);
+            border: 1px solid #f44336;
+        }
+        
+        .status-area.loading {
+            background: rgba(33,150,243,0.2);
+            border: 1px solid #2196f3;
+        }
+        
+        /* 頁尾 */
+        .footer {
+            text-align: center;
+            padding: 40px 0;
+            color: rgba(255,255,255,0.4);
+            margin-top: 60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <div class="logo">🎵 SoulTalk Tool v2.0</div>
+            <nav class="nav-links">
+                <a href="/settings.html">⚙️ 設定</a>
+                <a href="/subtitle-styles.html">🎨 樣式</a>
+                <a href="/logs.html">📋 日誌</a>
+                <a href="#" onclick="exportSettings(); return false;">💾 匯出</a>
+            </nav>
+        </header>
+        
+        <!-- Ragic 快速輸入 -->
+        <div class="quick-input">
+            <h3>🔍 Ragic 智能匯入</h3>
+            <div class="input-row">
+                <input type="text" id="ragicCode" placeholder="輸入 Ragic 代碼（例如：ABC123）">
+                <button onclick="loadRagicData()">載入資料</button>
+            </div>
+            <div class="status-area" id="statusArea"></div>
+        </div>
+        
+        <!-- 模式選擇 -->
+        <div class="mode-cards">
+            <!-- MV 模式 -->
+            <div class="mode-card mv" onclick="location.href='/mv.html'">
+                <div class="mode-icon">🎵</div>
+                <h2 class="mode-title">音樂 MV 模式</h2>
+                <p class="mode-desc">
+                    將歌曲搭配圖片輪播，生成專業的卡拉OK式字幕效果。
+                    支援逐字高亮、漸變動畫、多圖片輪播。
+                </p>
+                <ul class="mode-features">
+                    <li>逐字時間軸匹配</li>
+                    <li>卡拉OK高亮效果</li>
+                    <li>圖片智能輪播</li>
+                    <li>背景漸變動畫</li>
+                </ul>
+                <a class="mode-btn" href="/mv.html">開始製作 MV →</a>
+            </div>
+            
+            <!-- 語音模式 -->
+            <div class="mode-card audio" onclick="location.href='/audio.html'">
+                <div class="mode-icon">🎙️</div>
+                <h2 class="mode-title">語音字幕模式</h2>
+                <p class="mode-desc">
+                    將語音內容自動轉換為同步字幕，適合演講、
+                    Podcast、有聲書等內容製作。
+                </p>
+                <ul class="mode-features">
+                    <li>自動語音識別</li>
+                    <li>智能分行斷句</li>
+                    <li>逐行字幕顯示</li>
+                    <li>背景圖片支援</li>
+                </ul>
+                <a class="mode-btn" href="/audio.html">開始製作字幕 →</a>
+            </div>
+        </div>
+        
+        <!-- 頁尾 -->
+        <footer class="footer">
+            <p>SoulTalk Tool v2.0 | 模組化設計 | 支援 MV 和語音模式</p>
+        </footer>
+    </div>
+    
+    <script>
+        // 載入 Ragic 資料
+        async function loadRagicData() {
+            const code = document.getElementById('ragicCode').value.trim();
+            const statusArea = document.getElementById('statusArea');
+            
+            if (!code) {
+                showStatus('error', '請輸入 Ragic 代碼');
+                return;
+            }
+            
+            showStatus('loading', '正在載入資料...');
+            
+            try {
+                // 先嘗試 MV 模式
+                let response = await fetch(`/api/mv/fetch/${encodeURIComponent(code)}`);
+                let data = await response.json();
+                
+                if (data.success && data.data) {
+                    // 判斷模式
+                    if (data.data.audioUrl && data.data.lyrics) {
+                        // MV 模式
+                        showStatus('success', `✅ MV 資料載入成功！歌曲：${data.data.songTitle || '未命名'}`);
+                        setTimeout(() => {
+                            location.href = `/mv.html?code=${encodeURIComponent(code)}`;
+                        }, 1000);
+                    } else if (data.data.transcript) {
+                        // 語音模式
+                        showStatus('success', `✅ 語音資料載入成功！收件人：${data.data.name || '未命名'}`);
+                        setTimeout(() => {
+                            location.href = `/audio.html?code=${encodeURIComponent(code)}`;
+                        }, 1000);
+                    } else {
+                        showStatus('error', '❌ 資料不完整，請檢查 Ragic 記錄');
+                    }
+                } else {
+                    showStatus('error', '❌ ' + (data.error || '載入失敗'));
+                }
+                
+            } catch (error) {
+                showStatus('error', '❌ 載入失敗：' + error.message);
+            }
+        }
+        
+        // 顯示狀態
+        function showStatus(type, message) {
+            const statusArea = document.getElementById('statusArea');
+            statusArea.className = 'status-area show ' + type;
+            statusArea.innerHTML = message;
+        }
+        
+        // Enter 鍵觸發
+        document.getElementById('ragicCode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                loadRagicData();
+            }
+        });
+        
+        // 檢查 URL 參數
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (code) {
+            document.getElementById('ragicCode').value = code;
+            loadRagicData();
+        }
+        
+        // 匯出設定
+        function exportSettings() {
+            const choice = confirm('選擇匯出格式：\n\n確定 = HTML 檔案（可離線查看所有設定）\n取消 = JSON 檔案（用於匯入還原）');
+            
+            if (choice) {
+                window.location.href = '/api/export/html';
+            } else {
+                window.location.href = '/api/export/json';
+            }
+        }
+    </script>
+</body>
+</html>

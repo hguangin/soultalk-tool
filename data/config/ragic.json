@@ -1,0 +1,108 @@
+{
+    "_version": "1.0",
+    "_description": "Ragic 設定 - 從 V7.6.8 提取",
+    "_lastModified": "2025-12-05T00:00:00Z",
+    
+    "connection": {
+        "baseUrl": "https://ap13.ragic.com",
+        "account": "comeonn",
+        "tabPath": "mbti",
+        "sheetId": "5",
+        "apiKey": "SGhPWHVHSFI5OXIrVjhjQ0hwcmtuc0FGdjRGWHk3QjhGZnFjTUdtelhBbTFlb05KbHJTSi81Zk9uOUxFSEp0Rg=="
+    },
+    
+    "n8nWebhook": {
+        "fetchData": "https://app.notpro.cc/webhook/copy-q-image",
+        "uploadJson": "https://app.notpro.cc/webhook/up-mv-json"
+    },
+    
+    "fields": {
+        "code": {
+            "id": "1005241",
+            "name": "代碼",
+            "description": "查詢用代碼 (E1)"
+        },
+        "mvJson": {
+            "id": "1005421",
+            "name": "mv-json",
+            "description": "MV JSON 資料 (C22)"
+        },
+        "audioJson": {
+            "id": "1005420",
+            "name": "audio-json",
+            "description": "語音 JSON 資料 (A22)"
+        },
+        "mvCode": {
+            "id": "1005423",
+            "name": "mv代碼",
+            "description": "MV 隱私碼 (C21)"
+        },
+        "audioCode": {
+            "id": "1005422",
+            "name": "audio代碼",
+            "description": "語音隱私碼 (A21)"
+        },
+        "minimaxMusicUrl": {
+            "id": "1005414",
+            "name": "minimax音樂連結",
+            "description": "MV 音樂連結 (C13)"
+        },
+        "mp3Link0": {
+            "id": "1005419",
+            "name": "mp3連結0",
+            "description": "語音連結 (A13)",
+            "aliases": ["mp3連結0", "mp3連結", "語音連結", "音頻連結"]
+        },
+        "mp3Link1": {
+            "id": "1005406",
+            "name": "mp3連結1",
+            "description": "合併音檔連結 (A14)",
+            "aliases": ["mp3連結1", "合併音頻", "合併連結"]
+        },
+        "mp3Link2": {
+            "id": "1005409",
+            "name": "mp3連結2",
+            "description": "備用音檔連結 (A15)"
+        },
+        "mainCharacterImg": {
+            "id": "1005436",
+            "name": "語音圖-R2",
+            "description": "語音背景圖 (I19)",
+            "aliases": ["語音圖-R2", "語音圖", "主人物圖-R2", "主人物圖", "主圖", "背景圖"]
+        },
+        "soultalkTXT": {
+            "id": "1005235",
+            "name": "語音解說 (繁)",
+            "description": "語音字幕稿",
+            "aliases": ["語音解說 (繁)", "語音解說(繁)", "語音解說", "Soul Talk 文字稿", "Soul Talk文字稿", "文字稿", "transcript", "SoulTalk", "soultalk"]
+        },
+        "name": {
+            "id": "1005226",
+            "name": "姓名",
+            "description": "收件人姓名 (A1)",
+            "aliases": ["姓名", "名字", "name"]
+        },
+        "region": {
+            "id": "1005230",
+            "name": "地區",
+            "description": "地區設定",
+            "aliases": ["地區", "區域", "region"]
+        }
+    },
+    
+    "mvFields": {
+        "fullImages": "封面圖-R2",
+        "transparentImages": "去背圖-R2",
+        "wideImages": "16:9圖-R2",
+        "lyrics": "歌詞",
+        "songTitle": "歌曲名稱",
+        "artist": "演唱者"
+    },
+    
+    "audioFields": {
+        "backgroundImage": "語音圖-R2",
+        "transcript": "語音解說 (繁)",
+        "title": "Soul Talk 聽見自己",
+        "artistPrefix": "to: "
+    }
+}

@@ -1,0 +1,41 @@
+{
+    "_version": "1.0",
+    "_description": "地區 API 設定 - 從 V7.6.8 提取",
+    "_lastModified": "2025-12-05T00:00:00Z",
+    
+    "mv": {
+        "default": "147-whisper",
+        "regions": {
+            "台灣": "147-whisper",
+            "新加坡": "147-whisper",
+            "馬來西亞": "147-whisper",
+            "中國大陸": "147-whisper",
+            "香港": "n1n-whisper",
+            "澳門": "n1n-whisper"
+        }
+    },
+    
+    "audio": {
+        "default": "assemblyai",
+        "regions": {
+            "台灣": "assemblyai",
+            "新加坡": "assemblyai",
+            "馬來西亞": "assemblyai",
+            "中國大陸": "assemblyai",
+            "香港": "n1n-whisper",
+            "澳門": "n1n-whisper"
+        }
+    },
+    
+    "language": {
+        "default": "zh-TW",
+        "regions": {
+            "台灣": "zh-TW",
+            "新加坡": "zh-TW",
+            "馬來西亞": "zh-TW",
+            "中國大陸": "zh-CN",
+            "香港": "zh-HK",
+            "澳門": "zh-HK"
+        }
+    }
+}

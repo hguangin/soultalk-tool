@@ -1,0 +1,106 @@
+{
+    "_version": "1.0",
+    "_description": "通知系統設定",
+    "_lastModified": "2025-12-05T00:00:00Z",
+    
+    "channels": {
+        "telegram": {
+            "enabled": false,
+            "botToken": "",
+            "chatId": "",
+            "parseMode": "HTML",
+            "disablePreview": false
+        },
+        "email": {
+            "enabled": false,
+            "provider": "smtp",
+            "smtp": {
+                "host": "smtp.gmail.com",
+                "port": 587,
+                "secure": false,
+                "user": "",
+                "pass": ""
+            },
+            "from": "SoulTalk Tool <noreply@example.com>",
+            "to": []
+        },
+        "webhook": {
+            "enabled": true,
+            "endpoints": [
+                {
+                    "name": "N8N 工作完成",
+                    "url": "https://app.notpro.cc/webhook/job-complete",
+                    "method": "POST",
+                    "headers": {}
+                }
+            ]
+        },
+        "line": {
+            "enabled": false,
+            "accessToken": ""
+        },
+        "slack": {
+            "enabled": false,
+            "webhookUrl": ""
+        },
+        "discord": {
+            "enabled": false,
+            "webhookUrl": ""
+        }
+    },
+    
+    "rules": [
+        {
+            "name": "工作完成通知",
+            "event": "job.complete",
+            "conditions": {},
+            "channels": ["webhook"],
+            "template": "job-complete"
+        },
+        {
+            "name": "工作失敗通知",
+            "event": "job.failed",
+            "conditions": {},
+            "channels": ["webhook"],
+            "template": "job-failed",
+            "priority": "high"
+        }
+    ],
+    
+    "templates": {
+        "job-complete": {
+            "telegram": "✅ <b>工作完成</b>\n\n📌 {title}\n🎵 模式：{mode}\n⏱ 耗時：{duration}\n🔗 <a href=\"{playerUrl}\">查看播放器</a>",
+            "email": {
+                "subject": "✅ SoulTalk 工作完成：{title}",
+                "body": "<h2>工作已完成</h2><p>標題：{title}</p><p>模式：{mode}</p><p>耗時：{duration}</p>"
+            },
+            "webhook": {
+                "event": "job.complete",
+                "title": "{title}",
+                "mode": "{mode}",
+                "status": "complete",
+                "playerUrl": "{playerUrl}",
+                "ragicCode": "{ragicCode}",
+                "duration": "{duration}"
+            }
+        },
+        "job-failed": {
+            "telegram": "❌ <b>工作失敗</b>\n\n📌 {title}\n💥 錯誤：{error}\n🔄 重試次數：{retryCount}",
+            "email": {
+                "subject": "❌ SoulTalk 工作失敗：{title}",
+                "body": "<h2>工作失敗</h2><p>標題：{title}</p><p>錯誤：{error}</p>"
+            },
+            "webhook": {
+                "event": "job.failed",
+                "title": "{title}",
+                "mode": "{mode}",
+                "status": "failed",
+                "error": "{error}",
+                "retryCount": "{retryCount}"
+            }
+        },
+        "daily-summary": {
+            "telegram": "📊 <b>每日摘要</b> ({date})\n\n✅ 完成：{completedCount} 個\n❌ 失敗：{failedCount} 個\n⏳ 等待：{pendingCount} 個"
+        }
+    }
+}

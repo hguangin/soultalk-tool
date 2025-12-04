@@ -1,0 +1,24 @@
+{
+    "name": "soultalk-tool-v2",
+    "version": "2.0.0",
+    "description": "SoulTalk Tool v2.0 - 模組化字幕生成工具",
+    "main": "server/index.js",
+    "scripts": {
+        "start": "node server/index.js",
+        "dev": "nodemon server/index.js"
+    },
+    "dependencies": {
+        "express": "^4.18.2",
+        "cors": "^2.8.5",
+        "node-fetch": "^2.7.0",
+        "form-data": "^4.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    },
+    "engines": {
+        "node": ">=18.0.0"
+    },
+    "author": "",
+    "license": "MIT"
+}

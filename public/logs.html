@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系統日誌 - SoulTalk Tool v2.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans TC', 'Monaco', 'Consolas', monospace;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.5);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header h1 { font-size: 18px; color: #4ade80; }
+        .nav-links a { color: rgba(255,255,255,0.7); text-decoration: none; margin-left: 20px; font-size: 14px; }
+        .nav-links a:hover { color: #fff; }
+        
+        .container { display: flex; height: calc(100vh - 60px); }
+        
+        .sidebar {
+            width: 280px;
+            background: rgba(0,0,0,0.3);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        .filter-section { margin-bottom: 25px; }
+        .filter-title { font-size: 12px; color: rgba(255,255,255,0.5); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .stat-card { background: rgba(255,255,255,0.05); border-radius: 8px; padding: 12px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; }
+        .stat-value.error { color: #f87171; }
+        .stat-value.warn { color: #fbbf24; }
+        .stat-value.info { color: #4ade80; }
+        .stat-value.total { color: #60a5fa; }
+        .stat-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        
+        .level-filters { display: flex; flex-wrap: wrap; gap: 6px; }
+        .level-chip { padding: 4px 10px; border-radius: 12px; font-size: 11px; cursor: pointer; border: 1px solid transparent; transition: all 0.2s; }
+        .level-chip.debug { background: rgba(96,165,250,0.2); color: #60a5fa; }
+        .level-chip.info { background: rgba(74,222,128,0.2); color: #4ade80; }
+        .level-chip.warn { background: rgba(251,191,36,0.2); color: #fbbf24; }
+        .level-chip.error { background: rgba(248,113,113,0.2); color: #f87171; }
+        .level-chip.fatal { background: rgba(192,132,252,0.2); color: #c084fc; }
+        .level-chip.active { border-color: currentColor; }
+        
+        .category-filters { display: flex; flex-direction: column; gap: 4px; }
+        .category-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .category-item:hover { background: rgba(255,255,255,0.05); }
+        .category-count { margin-left: auto; color: rgba(255,255,255,0.4); }
+        
+        .btn { padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        .btn-primary { background: #4ade80; color: #000; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-group { display: flex; gap: 8px; margin-top: 15px; }
+        
+        .main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        
+        .toolbar { padding: 15px 20px; background: rgba(0,0,0,0.2); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 15px; }
+        .search-box { flex: 1; max-width: 400px; position: relative; }
+        .search-box input { width: 100%; padding: 10px 15px 10px 40px; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-size: 14px; }
+        .search-box::before { content: '🔍'; position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
+        .log-count { color: rgba(255,255,255,0.5); font-size: 13px; }
+        .auto-refresh { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.7); font-size: 13px; }
+        
+        .log-list { flex: 1; overflow-y: auto; padding: 15px 20px; }
+        
+        .log-entry { display: flex; flex-direction: column; padding: 12px 15px; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 8px; border-left: 3px solid transparent; cursor: pointer; }
+        .log-entry:hover { background: rgba(255,255,255,0.05); }
+        .log-entry.debug { border-left-color: #60a5fa; }
+        .log-entry.info { border-left-color: #4ade80; }
+        .log-entry.warn { border-left-color: #fbbf24; }
+        .log-entry.error { border-left-color: #f87171; }
+        .log-entry.fatal { border-left-color: #c084fc; }
+        .log-entry.expanded { background: rgba(255,255,255,0.08); }
+        
+        .log-main { display: flex; align-items: flex-start; gap: 12px; }
+        .log-time { width: 160px; font-size: 11px; color: rgba(255,255,255,0.4); font-family: monospace; }
+        .log-level { width: 50px; font-size: 10px; font-weight: bold; text-transform: uppercase; }
+        .log-level.debug { color: #60a5fa; }
+        .log-level.info { color: #4ade80; }
+        .log-level.warn { color: #fbbf24; }
+        .log-level.error { color: #f87171; }
+        .log-level.fatal { color: #c084fc; }
+        .log-category { font-size: 10px; color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); padding: 2px 8px; border-radius: 4px; }
+        .log-message { flex: 1; font-size: 13px; word-break: break-word; margin-left: 10px; }
+        
+        .log-details { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .log-entry.expanded .log-details { display: block; }
+        .log-details pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; font-size: 11px; overflow-x: auto; white-space: pre-wrap; }
+        
+        .error-details { background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.3); border-radius: 8px; padding: 15px; }
+        .error-details h4 { color: #f87171; font-size: 13px; margin-bottom: 10px; }
+        .error-field { display: flex; margin-bottom: 8px; font-size: 12px; }
+        .error-field-label { width: 120px; color: rgba(255,255,255,0.5); flex-shrink: 0; }
+        .error-field-value { flex: 1; word-break: break-all; }
+        .suggestions-list { margin-top: 10px; padding-left: 20px; }
+        .suggestions-list li { color: #fbbf24; font-size: 12px; margin-bottom: 4px; }
+        
+        .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); }
+        .empty-state .icon { font-size: 48px; margin-bottom: 15px; }
+        
+        .date-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+        .date-btn { padding: 6px 12px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; color: #fff; font-size: 12px; cursor: pointer; }
+        .date-btn:hover { background: rgba(255,255,255,0.1); }
+        .date-btn.active { background: rgba(74,222,128,0.2); border-color: #4ade80; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📋 系統日誌</h1>
+        <nav class="nav-links">
+            <a href="/">🏠 主頁</a>
+            <a href="/settings.html">⚙️ 設定</a>
+        </nav>
+    </header>
+    
+    <div class="container">
+        <aside class="sidebar">
+            <div class="filter-section">
+                <div class="filter-title">統計概覽</div>
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value total" id="statTotal">-</div><div class="stat-label">總日誌</div></div>
+                    <div class="stat-card"><div class="stat-value error" id="statError">-</div><div class="stat-label">錯誤</div></div>
+                    <div class="stat-card"><div class="stat-value warn" id="statWarn">-</div><div class="stat-label">警告</div></div>
+                    <div class="stat-card"><div class="stat-value info" id="statInfo">-</div><div class="stat-label">資訊</div></div>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">日期</div>
+                <div class="date-picker" id="datePicker"><button class="date-btn active" data-date="today">今天</button></div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">日誌等級</div>
+                <div class="level-filters" id="levelFilters">
+                    <span class="level-chip fatal active" data-level="fatal">💀 FATAL</span>
+                    <span class="level-chip error active" data-level="error">❌ ERROR</span>
+                    <span class="level-chip warn active" data-level="warn">⚠️ WARN</span>
+                    <span class="level-chip info active" data-level="info">ℹ️ INFO</span>
+                    <span class="level-chip debug" data-level="debug">🔍 DEBUG</span>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="filter-title">分類</div>
+                <div class="category-filters" id="categoryFilters">
+                    <label class="category-item"><input type="checkbox" value="all" checked> 全部 <span class="category-count" id="countAll">-</span></label>
+                    <label class="category-item"><input type="checkbox" value="api"> API <span class="category-count" id="countApi">-</span></label>
+                    <label class="category-item"><input type="checkbox" value="transcription"> 語音識別 <span class="category-count" id="countTranscription">-</span></label>
+                    <label class="category-item"><input type="checkbox" value="ai-matching"> AI 匹配 <span class="category-count" id="countAiMatching">-</span></label>
+                    <label class="category-item"><input type="checkbox" value="ragic"> Ragic <span class="category-count" id="countRagic">-</span></label>
+                    <label class="category-item"><input type="checkbox" value="system"> 系統 <span class="category-count" id="countSystem">-</span></label>
+                </div>
+            </div>
+            
+            <div class="filter-section">
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="loadLogs()">🔄 重新整理</button>
+                    <button class="btn btn-secondary" onclick="exportLogs()">📥 匯出</button>
+                </div>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="toolbar">
+                <div class="search-box"><input type="text" id="searchInput" placeholder="搜尋日誌..."></div>
+                <div class="log-count" id="logCount">載入中...</div>
+                <div class="auto-refresh"><input type="checkbox" id="autoRefresh"><label for="autoRefresh">自動重新整理</label></div>
+            </div>
+            <div class="log-list" id="logList"><div class="empty-state"><div class="icon">⏳</div><p>載入中...</p></div></div>
+        </main>
+    </div>
+    
+    <script>
+        let allLogs = [], selectedLevels = ['fatal','error','warn','info'], selectedDate = 'today', searchKeyword = '', autoRefreshInterval = null;
+        
+        document.addEventListener('DOMContentLoaded', () => { loadAvailableDates(); loadLogs(); setupEvents(); });
+        
+        function setupEvents() {
+            document.querySelectorAll('.level-chip').forEach(c => c.addEventListener('click', () => { c.classList.toggle('active'); updateLevels(); render(); }));
+            document.querySelectorAll('.category-filters input').forEach(i => i.addEventListener('change', render));
+            document.getElementById('searchInput').addEventListener('input', e => { searchKeyword = e.target.value.toLowerCase(); render(); });
+            document.getElementById('autoRefresh').addEventListener('change', e => { 
+                if(e.target.checked) autoRefreshInterval = setInterval(loadLogs, 5000); 
+                else clearInterval(autoRefreshInterval); 
+            });
+        }
+        
+        function updateLevels() { selectedLevels = [...document.querySelectorAll('.level-chip.active')].map(c => c.dataset.level); }
+        
+        async function loadLogs() {
+            try {
+                const params = new URLSearchParams({ limit: '500' });
+                if(selectedDate !== 'today') params.append('date', selectedDate);
+                const res = await fetch('/api/logs?' + params);
+                const data = await res.json();
+                if(data.success) { allLogs = data.logs || []; updateStats(data.stats); render(); }
+            } catch(e) { document.getElementById('logList').innerHTML = '<div class="empty-state"><div class="icon">❌</div><p>'+e.message+'</p></div>'; }
+        }
+        
+        async function loadAvailableDates() {
+            try {
+                const res = await fetch('/api/logs/dates');
+                const data = await res.json();
+                if(data.success && data.dates) {
+                    const container = document.getElementById('datePicker');
+                    let html = '<button class="date-btn active" data-date="today">今天</button>';
+                    data.dates.slice(0,7).forEach(d => { html += '<button class="date-btn" data-date="'+d+'">'+new Date(d).toLocaleDateString('zh-TW',{month:'short',day:'numeric'})+'</button>'; });
+                    container.innerHTML = html;
+                    container.querySelectorAll('.date-btn').forEach(b => b.addEventListener('click', () => {
+                        container.querySelectorAll('.date-btn').forEach(x => x.classList.remove('active'));
+                        b.classList.add('active');
+                        selectedDate = b.dataset.date;
+                        loadLogs();
+                    }));
+                }
+            } catch(e) {}
+        }
+        
+        function render() {
+            const allChecked = document.querySelector('input[value="all"]').checked;
+            const cats = allChecked ? null : [...document.querySelectorAll('.category-filters input:checked')].map(i=>i.value).filter(v=>v!=='all');
+            
+            const filtered = allLogs.filter(log => {
+                if(!selectedLevels.includes(log.level)) return false;
+                if(cats && cats.length && !cats.includes(log.category)) return false;
+                if(searchKeyword && !(log.message+JSON.stringify(log.details||{})).toLowerCase().includes(searchKeyword)) return false;
+                return true;
+            });
+            
+            document.getElementById('logCount').textContent = '顯示 '+filtered.length+' 筆';
+            const container = document.getElementById('logList');
+            
+            if(!filtered.length) { container.innerHTML = '<div class="empty-state"><div class="icon">📭</div><p>沒有日誌</p></div>'; return; }
+            
+            container.innerHTML = filtered.map(log => {
+                const time = new Date(log.timestamp).toLocaleString('zh-TW');
+                const hasDetails = log.details && Object.keys(log.details).length;
+                let details = '';
+                if(hasDetails) {
+                    if(log.level==='error'||log.level==='fatal') details = renderError(log.details);
+                    else details = '<pre>'+esc(JSON.stringify(log.details,null,2))+'</pre>';
+                }
+                return '<div class="log-entry '+log.level+'" onclick="this.classList.toggle(\'expanded\')"><div class="log-main"><span class="log-time">'+time+'</span><span class="log-level '+log.level+'">'+log.level+'</span><span class="log-category">'+log.category+'</span><span class="log-message">'+esc(log.message)+'</span></div>'+(hasDetails?'<div class="log-details">'+details+'</div>':'')+'</div>';
+            }).join('');
+        }
+        
+        function renderError(d) {
+            let html = '<div class="error-details"><h4>🔍 錯誤詳情</h4>';
+            const fields = [{k:'code',l:'錯誤碼'},{k:'apiName',l:'API'},{k:'endpoint',l:'端點'},{k:'httpStatus',l:'HTTP狀態'},{k:'method',l:'方法'},{k:'url',l:'URL'},{k:'duration',l:'耗時'},{k:'originalError',l:'原始錯誤'}];
+            fields.forEach(f => { if(d[f.k]) html += '<div class="error-field"><span class="error-field-label">'+f.l+':</span><span class="error-field-value">'+esc(String(d[f.k]))+'</span></div>'; });
+            if(d.suggestions?.length) { html += '<h4 style="margin-top:15px;color:#fbbf24">💡 建議</h4><ul class="suggestions-list">'; d.suggestions.forEach(s => html += '<li>'+esc(s)+'</li>'); html += '</ul>'; }
+            if(d.stack) html += '<h4 style="margin-top:15px">📚 堆疊</h4><pre style="font-size:10px">'+esc(d.stack)+'</pre>';
+            return html + '</div>';
+        }
+        
+        function updateStats(s) {
+            if(!s) return;
+            document.getElementById('statTotal').textContent = s.total||0;
+            document.getElementById('statError').textContent = (s.byLevel?.error||0)+(s.byLevel?.fatal||0);
+            document.getElementById('statWarn').textContent = s.byLevel?.warn||0;
+            document.getElementById('statInfo').textContent = s.byLevel?.info||0;
+            const c = s.byCategory||{};
+            document.getElementById('countAll').textContent = s.total||0;
+            document.getElementById('countApi').textContent = c.api||0;
+            document.getElementById('countTranscription').textContent = c.transcription||0;
+            document.getElementById('countAiMatching').textContent = c['ai-matching']||0;
+            document.getElementById('countRagic').textContent = c.ragic||0;
+            document.getElementById('countSystem').textContent = c.system||0;
+        }
+        
+        function esc(t) { const d=document.createElement('div'); d.textContent=t; return d.innerHTML; }
+        function exportLogs() { const b=new Blob([JSON.stringify(allLogs,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='logs-'+new Date().toISOString().slice(0,10)+'.json'; a.click(); }
+    </script>
+</body>
+</html>
