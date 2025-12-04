@@ -28,6 +28,7 @@ class RagicClient {
         const url = `${webhookUrl}?idtool=${encodeURIComponent(code)}`;
         
         console.log(`📡 Ragic 查詢: ${code}`);
+        console.log(`📡 URL: ${url}`);
         
         try {
             const response = await fetch(url);
@@ -39,8 +40,24 @@ class RagicClient {
             
             const rawData = await response.json();
             
+            console.log('📦 Ragic 原始回應:', JSON.stringify(rawData, null, 2).substring(0, 500));
+            
+            // ✅ 處理 Ragic 返回的數據結構
+            // 格式: { "19": { "_ragicId": 19, "1005226": "姓名", ... } }
+            const keys = Object.keys(rawData);
+            if (keys.length === 0) {
+                throw new Error('找不到該代碼的資料');
+            }
+            
+            // 取第一個 key 的值作為記錄
+            const firstKey = keys[0];
+            const record = rawData[firstKey];
+            
+            console.log('🔑 記錄 Key:', firstKey);
+            console.log('📄 記錄欄位:', Object.keys(record).slice(0, 10));
+            
             // 解析並映射欄位
-            return this.mapFields(rawData, mode);
+            return this.mapFields(record, mode);
             
         } catch (error) {
             console.error(`❌ Ragic 查詢失敗:`, error.message);
@@ -105,6 +122,12 @@ class RagicClient {
         const fields = this.config.fields;
         const result = {};
         
+        // 除錯：顯示原始資料的部分欄位
+        console.log('🔍 原始資料欄位檢查:');
+        console.log('  - 姓名 (1005226):', rawData['1005226'] || rawData['姓名']);
+        console.log('  - 地區 (1005230):', rawData['1005230'] || rawData['地區']);
+        console.log('  - minimax音樂連結 (1005414):', rawData['1005414'] || rawData['minimax音樂連結']);
+        
         // 通用欄位
         result.code = this.getFieldValue(rawData, fields.code);
         result.name = this.getFieldValue(rawData, fields.name);
@@ -116,14 +139,18 @@ class RagicClient {
             result.mvCode = this.getFieldValue(rawData, fields.mvCode);
             result.mvJson = this.getFieldValue(rawData, fields.mvJson);
             
-            // MV 專用欄位（從 mvFields 設定）
+            // MV 專用欄位（直接用名稱取值）
             const mvFields = this.config.mvFields;
-            const fullImages = this.getFieldValue(rawData, { name: mvFields.fullImages });
-            const transparentImages = this.getFieldValue(rawData, { name: mvFields.transparentImages });
-            const wideImages = this.getFieldValue(rawData, { name: mvFields.wideImages });
-            result.lyrics = this.getFieldValue(rawData, { name: mvFields.lyrics });
-            result.songTitle = this.getFieldValue(rawData, { name: mvFields.songTitle });
-            result.artist = this.getFieldValue(rawData, { name: mvFields.artist });
+            const fullImages = rawData[mvFields.fullImages] || '';
+            const transparentImages = rawData[mvFields.transparentImages] || '';
+            const wideImages = rawData[mvFields.wideImages] || '';
+            result.lyrics = rawData[mvFields.lyrics] || '';
+            result.songTitle = rawData[mvFields.songTitle] || '';
+            result.artist = rawData[mvFields.artist] || '';
+            
+            console.log('🎵 MV 欄位:');
+            console.log('  - 歌詞欄位名:', mvFields.lyrics, '值:', result.lyrics ? '有' : '無');
+            console.log('  - 封面圖欄位名:', mvFields.fullImages, '值:', fullImages ? '有' : '無');
             
             // 整合所有圖片到 images 陣列
             result.images = [];
@@ -154,6 +181,11 @@ class RagicClient {
             result.backgroundImage = this.getFieldValue(rawData, fields.mainCharacterImg);
             result.transcript = this.getFieldValue(rawData, fields.soultalkTXT);
             
+            console.log('🎙️ 語音欄位:');
+            console.log('  - 音頻 URL:', result.audioUrl ? '有' : '無');
+            console.log('  - 逐字稿:', result.transcript ? '有' : '無');
+            console.log('  - 背景圖:', result.backgroundImage ? '有' : '無');
+            
             // 語音專用欄位
             const audioFields = this.config.audioFields;
             result.title = audioFields.title;
@@ -178,14 +210,14 @@ class RagicClient {
     getFieldValue(data, fieldConfig) {
         if (!fieldConfig) return null;
         
+        // 優先嘗試欄位 ID（Ragic 原始格式用 ID）
+        if (fieldConfig.id && data[fieldConfig.id]) {
+            return data[fieldConfig.id];
+        }
+        
         // 嘗試欄位名稱
         if (fieldConfig.name && data[fieldConfig.name]) {
             return data[fieldConfig.name];
-        }
-        
-        // 嘗試欄位 ID
-        if (fieldConfig.id && data[fieldConfig.id]) {
-            return data[fieldConfig.id];
         }
         
         // 嘗試別名
