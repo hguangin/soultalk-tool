@@ -120,6 +120,115 @@ app.post('/api/config/reload', (req, res) => {
     }
 });
 
+// ==================== 提示詞 API ====================
+
+/**
+ * 取得提示詞
+ */
+app.get('/api/prompts/:name', (req, res) => {
+    const name = req.params.name;
+    const promptPath = path.join(__dirname, 'prompts', `${name}.txt`);
+    
+    try {
+        if (fs.existsSync(promptPath)) {
+            const content = fs.readFileSync(promptPath, 'utf8');
+            res.json({ success: true, content });
+        } else {
+            res.json({ success: true, content: '' });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * 儲存提示詞
+ */
+app.post('/api/prompts/:name', (req, res) => {
+    const name = req.params.name;
+    const { content } = req.body;
+    const promptPath = path.join(__dirname, 'prompts', `${name}.txt`);
+    
+    try {
+        fs.writeFileSync(promptPath, content || '', 'utf8');
+        logService.info('system', `提示詞已更新: ${name}`);
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+/**
+ * 恢復預設提示詞
+ */
+app.post('/api/prompts/reset', (req, res) => {
+    try {
+        // 預設提示詞
+        const defaults = {
+            'mv-matching': `你是一個專業的歌詞時間軸匹配助手。請根據語音識別結果，將歌詞與時間戳對齊。
+
+輸入：
+1. 原始歌詞
+2. 語音識別結果（包含每個字的時間戳）
+
+輸出 JSON 格式：
+[
+  {
+    "text": "歌詞行",
+    "start": 開始時間（秒）,
+    "end": 結束時間（秒）,
+    "words": [
+      { "char": "字", "start": 時間, "end": 時間 }
+    ]
+  }
+]
+
+注意事項：
+- 保持原始歌詞的分行
+- 時間必須連續，不能有重疊
+- 標點符號不需要單獨時間`,
+            'audio-matching': `你是一個專業的語音字幕匹配助手。請根據語音識別結果，將逐字稿分行並標註時間。
+
+輸入：
+1. 語音逐字稿
+2. 語音識別結果
+
+輸出 JSON 格式：
+[
+  {
+    "text": "字幕行（5-12字）",
+    "start": 開始時間,
+    "end": 結束時間
+  }
+]
+
+分行規則：
+- 每行 5-12 個字
+- 優先在標點符號處分行
+- 保持語意完整`,
+            'correction': `你是一個字幕校正助手。請檢查並修正字幕中的錯誤。
+
+檢查項目：
+1. 時間是否連續
+2. 是否有重疊
+3. 字幕文字是否正確
+4. 每行字數是否合適
+
+請直接輸出修正後的 JSON，格式與輸入相同。`
+        };
+        
+        Object.entries(defaults).forEach(([name, content]) => {
+            const promptPath = path.join(__dirname, 'prompts', `${name}.txt`);
+            fs.writeFileSync(promptPath, content, 'utf8');
+        });
+        
+        logService.info('system', '提示詞已恢復預設');
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
 // ==================== MV 模式 API ====================
 
 /**

@@ -731,12 +731,12 @@
                 document.getElementById('dataInfo').style.display = 'block';
                 document.getElementById('infoName').textContent = currentData.name || '-';
                 document.getElementById('infoRegion').textContent = currentData.region || '-';
-                document.getElementById('infoMusic').textContent = currentData.musicUrl ? '✓ 已取得' : '✗ 無';
+                document.getElementById('infoMusic').textContent = currentData.audioUrl ? '✓ 已取得' : '✗ 無';
                 
                 // 填入資料
-                if (currentData.musicUrl) {
-                    document.getElementById('audioUrl').value = currentData.musicUrl;
-                    document.getElementById('previewVideo').src = currentData.musicUrl;
+                if (currentData.audioUrl) {
+                    document.getElementById('audioUrl').value = currentData.audioUrl;
+                    document.getElementById('previewVideo').src = currentData.audioUrl;
                 }
                 
                 if (currentData.lyrics) {
@@ -781,20 +781,24 @@
             document.getElementById('btnTranscribe').disabled = true;
             
             try {
-                const formData = new FormData();
+                let targetUrl = audioUrl;
                 
-                if (audioFile) {
-                    formData.append('audio', audioFile);
-                } else {
-                    formData.append('audioUrl', audioUrl);
+                // 如果是檔案上傳，需要先上傳到伺服器（暫不支援）
+                if (audioFile && !audioUrl) {
+                    showStatus('error', '目前僅支援 URL 音頻，請提供音頻連結');
+                    showProgress(false);
+                    document.getElementById('btnTranscribe').disabled = false;
+                    return;
                 }
-                
-                formData.append('region', currentData?.region || '台灣');
-                formData.append('apiId', document.getElementById('transcriptionApi').value);
                 
                 const response = await fetch('/api/mv/transcribe', {
                     method: 'POST',
-                    body: formData
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        audioUrl: targetUrl,
+                        region: currentData?.region || '台灣',
+                        apiId: document.getElementById('transcriptionApi').value
+                    })
                 });
                 
                 const result = await response.json();

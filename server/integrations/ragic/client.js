@@ -4,7 +4,7 @@
  */
 
 const fetch = require('node-fetch');
-const configManager = require('../../services/config-manager');
+const configManager = require('../services/config-manager');
 
 class RagicClient {
     constructor() {

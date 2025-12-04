@@ -506,7 +506,14 @@
         
         <!-- 字幕樣式 -->
         <div class="tab-content" id="tab-subtitle">
-            <p style="color: rgba(255,255,255,0.6);">字幕樣式設定將在後續版本中提供...</p>
+            <div class="config-section">
+                <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">
+                    字幕樣式設定已移至獨立頁面，提供更完整的視覺化調整功能。
+                </p>
+                <a href="/subtitle-styles.html" class="btn btn-primary" target="_blank">
+                    🎨 開啟字幕樣式設定
+                </a>
+            </div>
         </div>
         
         <!-- 計算規則 -->
@@ -569,14 +576,21 @@
             <div class="config-section">
                 <h3>🎵 MV 匹配提示詞</h3>
                 <div class="form-group">
-                    <textarea id="mvPrompt" placeholder="MV 模式的 AI 提示詞..."></textarea>
+                    <textarea id="mvPrompt" rows="8" placeholder="MV 模式的 AI 提示詞..."></textarea>
                 </div>
             </div>
             
             <div class="config-section">
                 <h3>🎙️ 語音匹配提示詞</h3>
                 <div class="form-group">
-                    <textarea id="audioPrompt" placeholder="語音模式的 AI 提示詞..."></textarea>
+                    <textarea id="audioPrompt" rows="8" placeholder="語音模式的 AI 提示詞..."></textarea>
+                </div>
+            </div>
+            
+            <div class="config-section">
+                <h3>✏️ 校正提示詞</h3>
+                <div class="form-group">
+                    <textarea id="correctionPrompt" rows="8" placeholder="字幕校正的 AI 提示詞..."></textarea>
                 </div>
             </div>
             
@@ -770,6 +784,202 @@
         
         // 頁面載入
         loadConfigs();
+        loadPrompts();
+        
+        // 載入提示詞
+        async function loadPrompts() {
+            try {
+                // 載入 MV 提示詞
+                const mvRes = await fetch('/api/prompts/mv-matching');
+                if (mvRes.ok) {
+                    const mvData = await mvRes.json();
+                    document.getElementById('mvPrompt').value = mvData.content || '';
+                }
+                
+                // 載入語音提示詞
+                const audioRes = await fetch('/api/prompts/audio-matching');
+                if (audioRes.ok) {
+                    const audioData = await audioRes.json();
+                    document.getElementById('audioPrompt').value = audioData.content || '';
+                }
+                
+                // 載入校正提示詞
+                const corrRes = await fetch('/api/prompts/correction');
+                if (corrRes.ok) {
+                    const corrData = await corrRes.json();
+                    document.getElementById('correctionPrompt').value = corrData.content || '';
+                }
+            } catch (error) {
+                console.error('載入提示詞失敗:', error);
+            }
+        }
+        
+        // 儲存通知設定
+        async function saveNotifyConfig() {
+            const data = {
+                ...configs.notifications,
+                channels: {
+                    ...configs.notifications?.channels,
+                    telegram: {
+                        enabled: document.getElementById('telegramEnabled').checked,
+                        botToken: document.getElementById('telegramBotToken').value,
+                        chatId: document.getElementById('telegramChatId').value,
+                        parseMode: 'HTML'
+                    },
+                    email: {
+                        enabled: document.getElementById('emailEnabled').checked,
+                        provider: 'smtp',
+                        smtp: {
+                            host: document.getElementById('emailSmtpHost').value,
+                            port: 587,
+                            user: document.getElementById('emailSmtpUser').value,
+                            pass: document.getElementById('emailSmtpPass').value
+                        }
+                    }
+                }
+            };
+            await saveConfig('notifications', data);
+        }
+        
+        // 測試通知
+        async function testNotify() {
+            try {
+                const response = await fetch('/api/notify/test', { method: 'POST' });
+                const result = await response.json();
+                if (result.success) {
+                    showMessage('success', '✅ 測試通知已發送');
+                } else {
+                    showMessage('error', '❌ 測試失敗: ' + result.error);
+                }
+            } catch (error) {
+                showMessage('error', '❌ 測試失敗: ' + error.message);
+            }
+        }
+        
+        // 儲存計算規則
+        async function saveRulesConfig() {
+            const data = {
+                ...configs['subtitle-rules'],
+                timing: {
+                    charEstimateTime: parseFloat(document.getElementById('charEstimateTime').value),
+                    bufferTime: parseFloat(document.getElementById('bufferTime').value),
+                    maxDuration: parseFloat(document.getElementById('maxDuration').value),
+                    mvGapThreshold: parseFloat(document.getElementById('mvGapThreshold').value),
+                    audioGapThreshold: parseFloat(document.getElementById('audioGapThreshold').value),
+                    lastCharExtend: configs['subtitle-rules']?.timing?.lastCharExtend || 1.0,
+                    syncOffset: configs['subtitle-rules']?.timing?.syncOffset || 0
+                },
+                lineBreaking: {
+                    mv: {
+                        minChars: parseInt(document.getElementById('mvMinChars').value),
+                        maxChars: parseInt(document.getElementById('mvMaxChars').value)
+                    },
+                    audio: {
+                        minChars: parseInt(document.getElementById('audioMinChars').value),
+                        maxChars: parseInt(document.getElementById('audioMaxChars').value)
+                    },
+                    preferSentenceEnd: true,
+                    breakOnPunctuation: configs['subtitle-rules']?.lineBreaking?.breakOnPunctuation || []
+                }
+            };
+            await saveConfig('subtitle-rules', data);
+        }
+        
+        // 儲存 Ragic 設定
+        async function saveRagicConfig() {
+            const data = {
+                ...configs.ragic,
+                connection: {
+                    ...configs.ragic?.connection,
+                    baseUrl: document.getElementById('ragicBaseUrl').value,
+                    account: document.getElementById('ragicAccount').value,
+                    apiKey: document.getElementById('ragicApiKey').value
+                },
+                n8nWebhook: {
+                    fetchData: document.getElementById('n8nFetchUrl').value,
+                    uploadJson: document.getElementById('n8nUploadUrl').value
+                }
+            };
+            await saveConfig('ragic', data);
+        }
+        
+        // 儲存地區設定
+        async function saveRegionConfig() {
+            const regions = ['台灣', '香港', '澳門', '新加坡', '馬來西亞', '中國大陸'];
+            const data = {
+                ...configs['region-apis'],
+                mv: {
+                    ...configs['region-apis']?.mv,
+                    regions: {}
+                },
+                audio: {
+                    ...configs['region-apis']?.audio,
+                    regions: {}
+                }
+            };
+            
+            regions.forEach(region => {
+                const mvSelect = document.getElementById('mvRegion_' + region);
+                const audioSelect = document.getElementById('audioRegion_' + region);
+                if (mvSelect) data.mv.regions[region] = mvSelect.value;
+                if (audioSelect) data.audio.regions[region] = audioSelect.value;
+            });
+            
+            await saveConfig('region-apis', data);
+        }
+        
+        // 儲存提示詞
+        async function savePromptsConfig() {
+            try {
+                // 儲存 MV 提示詞
+                await fetch('/api/prompts/mv-matching', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: document.getElementById('mvPrompt').value })
+                });
+                
+                // 儲存語音提示詞
+                await fetch('/api/prompts/audio-matching', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: document.getElementById('audioPrompt').value })
+                });
+                
+                // 儲存校正提示詞
+                await fetch('/api/prompts/correction', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ content: document.getElementById('correctionPrompt').value })
+                });
+                
+                showMessage('success', '✅ 提示詞已儲存');
+            } catch (error) {
+                showMessage('error', '❌ 儲存失敗: ' + error.message);
+            }
+        }
+        
+        // 恢復預設提示詞
+        async function resetPrompts() {
+            if (!confirm('確定要恢復預設提示詞嗎？目前的設定將被覆蓋。')) return;
+            
+            try {
+                await fetch('/api/prompts/reset', { method: 'POST' });
+                await loadPrompts();
+                showMessage('success', '✅ 已恢復預設提示詞');
+            } catch (error) {
+                showMessage('error', '❌ 恢復失敗: ' + error.message);
+            }
+        }
+        
+        // 編輯 API（佔位）
+        function editApi(type, id) {
+            alert('API 編輯功能開發中...\n\n目前請直接編輯設定檔或使用匯入/匯出功能。');
+        }
+        
+        // 編輯模型（佔位）
+        function editModel(id) {
+            alert('模型編輯功能開發中...\n\n目前請直接編輯設定檔或使用匯入/匯出功能。');
+        }
         
         // ==================== 匯出/匯入功能 ====================
         
