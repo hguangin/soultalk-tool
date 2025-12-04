@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - SoulTalk Tool</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <h1>⚙️ 設定中心</h1>
+            <nav>
+                <a href="/">執行工作</a>
+                <a href="/settings.html" class="active">⚙️ 設定</a>
+            </nav>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="main settings-page">
+            <!-- 分類選單 -->
+            <aside class="sidebar">
+                <h3>設定分類</h3>
+                <ul id="categoryList" class="category-list">
+                    <li class="loading">載入中...</li>
+                </ul>
+                
+                <div class="sidebar-actions">
+                    <button id="btnTestNotify" class="btn btn-small">📱 測試通知</button>
+                </div>
+            </aside>
+
+            <!-- 設定內容 -->
+            <section class="settings-content">
+                <div class="settings-header">
+                    <h2 id="categoryTitle">選擇分類</h2>
+                    <button id="btnSave" class="btn btn-primary" disabled>💾 儲存變更</button>
+                </div>
+                
+                <div id="settingsForm" class="settings-form">
+                    <p class="placeholder">← 請從左側選擇設定分類</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- 訊息提示 -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script>
+    /**
+     * ============================================================================
+     * 設定頁面的前端程式
+     * ============================================================================
+     */
+
+    // 狀態
+    let categories = [];
+    let currentCategory = null;
+    let currentSettings = [];
+    let hasChanges = false;
+
+    // DOM 元素
+    const categoryList = document.getElementById('categoryList');
+    const categoryTitle = document.getElementById('categoryTitle');
+    const settingsForm = document.getElementById('settingsForm');
+    const btnSave = document.getElementById('btnSave');
+    const btnTestNotify = document.getElementById('btnTestNotify');
+    const toast = document.getElementById('toast');
+
+    // ========== 初始化 ==========
+    async function init() {
+        await loadCategories();
+        
+        btnSave.addEventListener('click', saveSettings);
+        btnTestNotify.addEventListener('click', testNotification);
+    }
+
+    // ========== 載入分類 ==========
+    async function loadCategories() {
+        try {
+            const res = await fetch('/api/settings/categories');
+            const data = await res.json();
+            
+            if (data.success) {
+                categories = data.categories;
+                renderCategories();
+            }
+        } catch (error) {
+            showToast('載入分類失敗: ' + error.message, 'error');
+        }
+    }
+
+    function renderCategories() {
+        categoryList.innerHTML = categories.map(cat => `
+            <li data-id="${cat.id}" onclick="selectCategory('${cat.id}')">
+                ${cat.name}
+            </li>
+        `).join('');
+    }
+
+    // ========== 選擇分類 ==========
+    async function selectCategory(categoryId) {
+        // 如果有未儲存的變更，提醒
+        if (hasChanges) {
+            if (!confirm('有未儲存的變更，確定要離開嗎？')) {
+                return;
+            }
+        }
+
+        currentCategory = categoryId;
+        
+        // 更新選中狀態
+        document.querySelectorAll('.category-list li').forEach(li => {
+            li.classList.toggle('active', li.dataset.id === categoryId);
+        });
+
+        // 載入設定
+        try {
+            const res = await fetch(`/api/settings/category/${categoryId}`);
+            const data = await res.json();
+            
+            if (data.success) {
+                currentSettings = data.settings;
+                renderSettings();
+                
+                // 更新標題
+                const cat = categories.find(c => c.id === categoryId);
+                categoryTitle.textContent = cat ? cat.name : categoryId;
+            }
+        } catch (error) {
+            showToast('載入設定失敗: ' + error.message, 'error');
+        }
+    }
+
+    // ========== 渲染設定表單 ==========
+    function renderSettings() {
+        if (currentSettings.length === 0) {
+            settingsForm.innerHTML = '<p class="placeholder">此分類沒有設定項目</p>';
+            return;
+        }
+
+        settingsForm.innerHTML = currentSettings.map(s => {
+            const inputHtml = renderInput(s);
+            return `
+                <div class="setting-item">
+                    <label for="setting-${s.key}">${s.label || s.key}</label>
+                    ${inputHtml}
+                    ${s.description ? `<p class="setting-desc">${s.description}</p>` : ''}
+                </div>
+            `;
+        }).join('');
+
+        // 監聽變更
+        settingsForm.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('change', () => markChanged());
+            el.addEventListener('input', () => markChanged());
+        });
+
+        hasChanges = false;
+        btnSave.disabled = true;
+    }
+
+    function renderInput(setting) {
+        const id = `setting-${setting.key}`;
+        const value = setting.value || '';
+
+        switch (setting.type) {
+            case 'password':
+                return `<input type="password" id="${id}" data-key="${setting.key}" value="${escapeHtml(value)}" placeholder="••••••••">`;
+            
+            case 'number':
+                return `<input type="number" id="${id}" data-key="${setting.key}" value="${escapeHtml(value)}">`;
+            
+            case 'boolean':
+                const checked = value === 'true' ? 'checked' : '';
+                return `
+                    <label class="toggle">
+                        <input type="checkbox" id="${id}" data-key="${setting.key}" ${checked}>
+                        <span class="toggle-slider"></span>
+                    </label>
+                `;
+            
+            case 'color':
+                return `<input type="color" id="${id}" data-key="${setting.key}" value="${escapeHtml(value)}">`;
+            
+            case 'select':
+                const options = (setting.options || '').split(',').map(opt => {
+                    const selected = opt.trim() === value ? 'selected' : '';
+                    return `<option value="${opt.trim()}" ${selected}>${opt.trim()}</option>`;
+                }).join('');
+                return `<select id="${id}" data-key="${setting.key}">${options}</select>`;
+            
+            case 'textarea':
+            case 'json':
+                return `<textarea id="${id}" data-key="${setting.key}" rows="6">${escapeHtml(value)}</textarea>`;
+            
+            default:
+                return `<input type="text" id="${id}" data-key="${setting.key}" value="${escapeHtml(value)}">`;
+        }
+    }
+
+    // ========== 儲存設定 ==========
+    async function saveSettings() {
+        const updates = [];
+        
+        settingsForm.querySelectorAll('[data-key]').forEach(el => {
+            const key = el.dataset.key;
+            let value;
+            
+            if (el.type === 'checkbox') {
+                value = el.checked ? 'true' : 'false';
+            } else {
+                value = el.value;
+            }
+            
+            updates.push({ key, value });
+        });
+
+        try {
+            const res = await fetch('/api/settings/batch', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ updates })
+            });
+            
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('✅ 設定已儲存', 'success');
+                hasChanges = false;
+                btnSave.disabled = true;
+            } else {
+                showToast('❌ 儲存失敗: ' + data.error, 'error');
+            }
+        } catch (error) {
+            showToast('❌ 儲存失敗: ' + error.message, 'error');
+        }
+    }
+
+    // ========== 測試通知 ==========
+    async function testNotification() {
+        try {
+            btnTestNotify.disabled = true;
+            btnTestNotify.textContent = '發送中...';
+            
+            const res = await fetch('/api/test/notification', { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success) {
+                showToast('✅ 測試通知已發送', 'success');
+            } else {
+                showToast('❌ ' + (data.message || '發送失敗'), 'error');
+            }
+        } catch (error) {
+            showToast('❌ ' + error.message, 'error');
+        } finally {
+            btnTestNotify.disabled = false;
+            btnTestNotify.textContent = '📱 測試通知';
+        }
+    }
+
+    // ========== 工具函數 ==========
+    function markChanged() {
+        hasChanges = true;
+        btnSave.disabled = false;
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function showToast(message, type = 'info') {
+        toast.textContent = message;
+        toast.className = `toast show ${type}`;
+        setTimeout(() => {
+            toast.className = 'toast';
+        }, 3000);
+    }
+
+    // 全域函數（給 onclick 用）
+    window.selectCategory = selectCategory;
+
+    // 啟動
+    init();
+    </script>
+</body>
+</html>

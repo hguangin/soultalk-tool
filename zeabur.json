@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.zeabur.app/template.json",
+  "build": {
+    "type": "nodejs"
+  },
+  "start": {
+    "command": "npm start"
+  },
+  "ports": [
+    {
+      "port": 8080,
+      "protocol": "http"
+    }
+  ]
+}

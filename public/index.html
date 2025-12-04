@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoulTalk Tool v2.0</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 頂部導航 -->
+        <header class="header">
+            <h1>🎬 SoulTalk Tool</h1>
+            <nav>
+                <a href="/" class="active">執行工作</a>
+                <a href="/settings.html">⚙️ 設定</a>
+            </nav>
+        </header>
+
+        <!-- 主要內容 -->
+        <main class="main">
+            <!-- 新增工作區塊 -->
+            <section class="card">
+                <h2>📋 新增工作</h2>
+                
+                <div class="form-group">
+                    <label for="jobType">模式</label>
+                    <select id="jobType">
+                        <option value="mv">🎵 MV 模式</option>
+                        <option value="audio">🎙️ 語音模式</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="ragicCode">Ragic 代碼</label>
+                    <input type="text" id="ragicCode" placeholder="例如：Efji6e（留空可手動輸入資料）">
+                </div>
+
+                <!-- 手動輸入區 -->
+                <details class="manual-input">
+                    <summary>📝 手動輸入資料（可選）</summary>
+                    
+                    <div class="form-group">
+                        <label for="inputTitle">標題</label>
+                        <input type="text" id="inputTitle" placeholder="歌曲/影片標題">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inputArtist">演唱者/演講者</label>
+                        <input type="text" id="inputArtist" placeholder="名稱">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inputAudioUrl">音頻 URL</label>
+                        <input type="text" id="inputAudioUrl" placeholder="https://...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inputLyrics">歌詞/字幕</label>
+                        <textarea id="inputLyrics" rows="6" placeholder="貼上歌詞或字幕內容..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="inputImages">圖片列表</label>
+                        <textarea id="inputImages" rows="4" placeholder="[full] https://example.com/image1.jpg"></textarea>
+                    </div>
+                </details>
+
+                <button id="btnStart" class="btn btn-primary">🚀 開始執行</button>
+            </section>
+
+            <!-- 執行中的工作 -->
+            <section class="card" id="runningSection" style="display: none;">
+                <h2>⏳ 執行中</h2>
+                <div id="runningJob">
+                    <div class="job-info">
+                        <span class="job-name" id="runningName">-</span>
+                        <span class="job-status" id="runningStatus">-</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="runningProgress" style="width: 0%"></div>
+                    </div>
+                    <div class="job-step" id="runningStep">準備中...</div>
+                    <div class="job-actions">
+                        <button id="btnPause" class="btn btn-warning">⏸️ 暫停</button>
+                        <button id="btnCancel" class="btn btn-danger">🚫 取消</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 工作歷史 -->
+            <section class="card">
+                <h2>📜 工作歷史</h2>
+                <div id="jobList" class="job-list">
+                    <p class="loading">載入中...</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- 訊息提示 -->
+        <div id="toast" class="toast"></div>
+    </div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>

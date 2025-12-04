@@ -1,0 +1,21 @@
+# 依賴套件
+node_modules/
+
+# 資料檔案（設定和工作記錄）
+data/
+
+# 系統檔案
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# 日誌
+*.log
+npm-debug.log*
+
+# 環境變數（如果有用到）
+.env
+.env.local
