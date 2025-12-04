@@ -185,7 +185,10 @@ class TranscriptionService {
         if (!audioResponse.ok) {
             throw new Error(`音頻下載失敗: ${audioResponse.status}`);
         }
-        const audioBuffer = await audioResponse.buffer();
+        
+        // 使用 arrayBuffer() 替代已棄用的 buffer()
+        const arrayBuffer = await audioResponse.arrayBuffer();
+        const audioBuffer = Buffer.from(arrayBuffer);
 
         // 2. 準備表單
         const formData = new FormData();
