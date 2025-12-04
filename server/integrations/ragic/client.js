@@ -118,12 +118,32 @@ class RagicClient {
             
             // MV 專用欄位（從 mvFields 設定）
             const mvFields = this.config.mvFields;
-            result.fullImages = this.getFieldValue(rawData, { name: mvFields.fullImages });
-            result.transparentImages = this.getFieldValue(rawData, { name: mvFields.transparentImages });
-            result.wideImages = this.getFieldValue(rawData, { name: mvFields.wideImages });
+            const fullImages = this.getFieldValue(rawData, { name: mvFields.fullImages });
+            const transparentImages = this.getFieldValue(rawData, { name: mvFields.transparentImages });
+            const wideImages = this.getFieldValue(rawData, { name: mvFields.wideImages });
             result.lyrics = this.getFieldValue(rawData, { name: mvFields.lyrics });
             result.songTitle = this.getFieldValue(rawData, { name: mvFields.songTitle });
             result.artist = this.getFieldValue(rawData, { name: mvFields.artist });
+            
+            // 整合所有圖片到 images 陣列
+            result.images = [];
+            if (fullImages) {
+                const urls = fullImages.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => result.images.push({ url, type: 'full' }));
+            }
+            if (transparentImages) {
+                const urls = transparentImages.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => result.images.push({ url, type: 'transparent' }));
+            }
+            if (wideImages) {
+                const urls = wideImages.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => result.images.push({ url, type: 'wide' }));
+            }
+            
+            // 保留原始欄位供其他用途
+            result.fullImages = fullImages;
+            result.transparentImages = transparentImages;
+            result.wideImages = wideImages;
             
         } else {
             // 語音模式欄位
@@ -138,9 +158,17 @@ class RagicClient {
             const audioFields = this.config.audioFields;
             result.title = audioFields.title;
             result.artistPrefix = audioFields.artistPrefix;
+            
+            // 整合圖片
+            result.images = [];
+            if (result.backgroundImage) {
+                const urls = result.backgroundImage.split(',').map(u => u.trim()).filter(u => u);
+                urls.forEach(url => result.images.push({ url, type: 'background' }));
+            }
         }
         
         console.log(`📦 欄位映射完成:`, Object.keys(result).filter(k => result[k]).length, '個欄位有值');
+        console.log(`📷 圖片數量: ${result.images?.length || 0}`);
         return result;
     }
     
