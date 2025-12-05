@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SoulTalk V2 - 專屬結尾設定</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans TC', -apple-system, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        /* 導航 */
+        .navbar {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .navbar h1 { font-size: 1.4rem; flex: 1; }
+        .navbar a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+        .navbar a:hover { background: rgba(255,255,255,0.2); }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        
+        /* 大標題說明 */
+        .page-intro {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .page-intro h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        
+        .page-intro p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+            line-height: 1.8;
+        }
+        
+        /* 步驟卡片 */
+        .step-card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .step-card:hover {
+            border-color: #667eea;
+        }
+        
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .step-number {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .step-title {
+            flex: 1;
+        }
+        
+        .step-title h3 {
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        
+        .step-title p {
+            font-size: 0.95rem;
+            color: #666;
+        }
+        
+        /* 開關 - 超大版 */
+        .big-switch {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .big-switch:hover {
+            background: #f0f2f5;
+        }
+        
+        .big-switch.on {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            border: 2px solid #667eea;
+        }
+        
+        .switch-toggle {
+            width: 70px;
+            height: 38px;
+            background: #ccc;
+            border-radius: 19px;
+            position: relative;
+            transition: all 0.3s;
+            flex-shrink: 0;
+        }
+        
+        .switch-toggle::after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #fff;
+            border-radius: 50%;
+            top: 4px;
+            left: 4px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .big-switch.on .switch-toggle {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+        
+        .big-switch.on .switch-toggle::after {
+            left: 36px;
+        }
+        
+        .switch-label {
+            flex: 1;
+        }
+        
+        .switch-label .title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .switch-label .desc {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .switch-status {
+            font-size: 1.1rem;
+            font-weight: bold;
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+        
+        .big-switch.on .switch-status {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .big-switch:not(.on) .switch-status {
+            background: #e0e0e0;
+            color: #666;
+        }
+        
+        /* 文字編輯區 */
+        .text-editor {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+        }
+        
+        .text-editor label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .text-editor input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 1.2rem;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+        
+        .text-editor input:focus {
+            border-color: #667eea;
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+        }
+        
+        /* 變數提示 */
+        .variable-hints {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .variable-hint {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .variable-hint:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .variable-hint code {
+            background: #667eea;
+            color: #fff;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 0.95rem;
+        }
+        
+        .variable-hint span {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* 滑桿設定 */
+        .slider-group {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .slider-header label {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .slider-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 8px 20px;
+            border-radius: 10px;
+        }
+        
+        .slider-container {
+            position: relative;
+            padding: 10px 0;
+        }
+        
+        .slider-container input[type="range"] {
+            width: 100%;
+            height: 12px;
+            border-radius: 6px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+        
+        .slider-desc {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 10px;
+        }
+        
+        .slider-scale {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 0.85rem;
+            color: #999;
+        }
+        
+        /* 即時預覽 */
+        .live-preview {
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .preview-screen {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 星星背景 */
+        .preview-stars {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow: hidden;
+        }
+        
+        .preview-star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* 結尾文字 */
+        .ending-text {
+            color: #fff;
+            text-align: center;
+            padding: 30px;
+            z-index: 10;
+            position: relative;
+            text-shadow: 0 3px 15px rgba(0,0,0,0.5);
+            animation: fadeInOut 4s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(0.95); }
+            20% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0.95); }
+        }
+        
+        .preview-label {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            background: rgba(0,0,0,0.7);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+        
+        /* 預設模板 */
+        .template-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .template-option {
+            padding: 20px;
+            background: #fff;
+            border: 3px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .template-option:hover {
+            border-color: #667eea;
+        }
+        
+        .template-option.selected {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .template-option .preview {
+            font-size: 0.95rem;
+            color: #333;
+            margin-bottom: 10px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .template-option .desc {
+            font-size: 0.85rem;
+            color: #666;
+        }
+        
+        /* 儲存按鈕 */
+        .save-section {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        
+        .save-btn {
+            padding: 20px 60px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .save-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+        }
+        
+        .save-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 成功提示 */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #4caf50;
+            color: #fff;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: all 0.5s;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* 小提示框 */
+        .tip-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 20px;
+            border-radius: 0 12px 12px 0;
+            margin: 20px 0;
+        }
+        
+        .tip-box strong {
+            color: #856404;
+        }
+        
+        .tip-box p {
+            margin-top: 10px;
+            color: #856404;
+            line-height: 1.6;
+        }
+        
+        /* RWD */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .step-card { padding: 20px; }
+            .page-intro { padding: 20px; }
+            .page-intro h2 { font-size: 1.4rem; }
+            .variable-hints { flex-direction: column; }
+            .slider-value { font-size: 1.1rem; padding: 6px 15px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航 -->
+    <nav class="navbar">
+        <h1>✨ 專屬結尾設定</h1>
+        <a href="/">🏠 首頁</a>
+        <a href="/settings">⚙️ 設定</a>
+        <a href="/mv">🎬 MV</a>
+    </nav>
+    
+    <div class="container">
+        <!-- 頁面介紹 -->
+        <div class="page-intro">
+            <h2>🌟 讓每個人都有專屬的結尾</h2>
+            <p>
+                在影片最後 8 秒，顯示一段專屬文字<br>
+                慢慢淡入，停留一下，再慢慢淡出<br>
+                例如：「這是屬於 小明 的 INFP 專屬時刻」
+            </p>
+        </div>
+        
+        <!-- 步驟 1: 開關 -->
+        <div class="step-card">
+            <div class="step-header">
+                <div class="step-number">1</div>
+                <div class="step-title">
+                    <h3>要不要用這個功能？</h3>
+                    <p>先決定要不要在影片最後顯示專屬文字</p>
+                </div>
+            </div>
+            
+            <div class="big-switch on" id="mainSwitch" onclick="toggleSwitch()">
+                <div class="switch-toggle"></div>
+                <div class="switch-label">
+                    <div class="title">專屬結尾功能</div>
+                    <div class="desc">在影片最後顯示專屬於這個人的文字</div>
+                </div>
+                <div class="switch-status" id="switchStatus">已開啟</div>
+            </div>
+        </div>
+        
+        <!-- 步驟 2: 文字內容 -->
+        <div class="step-card" id="step2">
+            <div class="step-header">
+                <div class="step-number">2</div>
+                <div class="step-title">
+                    <h3>要顯示什麼文字？</h3>
+                    <p>選一個模板，或自己打字</p>
+                </div>
+            </div>
+            
+            <!-- 預設模板 -->
+            <div style="margin-bottom: 25px;">
+                <label style="font-size: 1rem; font-weight: 600; margin-bottom: 15px; display: block;">
+                    📋 選一個喜歡的模板（點選就會套用）：
+                </label>
+                <div class="template-options">
+                    <div class="template-option selected" onclick="selectTemplate(this, '這是屬於 {name} 的 {mbti} 專屬時刻')">
+                        <div class="preview">這是屬於 <strong>小明</strong> 的 <strong>INFP</strong> 專屬時刻</div>
+                        <div class="desc">經典款 - 顯示名字和 MBTI</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate(this, '獻給獨一無二的 {name}')">
+                        <div class="preview">獻給獨一無二的 <strong>小明</strong></div>
+                        <div class="desc">簡約款 - 只顯示名字</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate(this, '{name}，{mbti} 的你最特別')">
+                        <div class="preview"><strong>小明</strong>，<strong>INFP</strong> 的你最特別</div>
+                        <div class="desc">親密款 - 像在對他說話</div>
+                    </div>
+                    <div class="template-option" onclick="selectTemplate(this, '專屬於 {name} 的療癒時光')">
+                        <div class="preview">專屬於 <strong>小明</strong> 的療癒時光</div>
+                        <div class="desc">療癒款 - 溫暖治癒風</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 自訂文字 -->
+            <div class="text-editor">
+                <label>✏️ 或者自己打字（可以用下面的變數）：</label>
+                <input type="text" id="endingText" value="這是屬於 {name} 的 {mbti} 專屬時刻" 
+                       oninput="updatePreview()" placeholder="輸入你想顯示的文字">
+                
+                <div class="variable-hints">
+                    <div class="variable-hint" onclick="insertVariable('{name}')">
+                        <code>{name}</code>
+                        <span>= 這個人的名字</span>
+                    </div>
+                    <div class="variable-hint" onclick="insertVariable('{mbti}')">
+                        <code>{mbti}</code>
+                        <span>= 這個人的 MBTI</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tip-box">
+                <strong>💡 小提示</strong>
+                <p>
+                    <code>{name}</code> 會自動換成那個人的名字<br>
+                    <code>{mbti}</code> 會自動換成那個人的 MBTI 類型<br>
+                    例如：「這是屬於 {name} 的時刻」→「這是屬於 小明 的時刻」
+                </p>
+            </div>
+        </div>
+        
+        <!-- 步驟 3: 字體大小 -->
+        <div class="step-card" id="step3">
+            <div class="step-header">
+                <div class="step-number">3</div>
+                <div class="step-title">
+                    <h3>字要多大？</h3>
+                    <p>拉動滑桿調整大小，右邊可以即時預覽</p>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <div>
+                    <!-- 電腦版字體 -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>💻 電腦上看到的大小</label>
+                            <div class="slider-value"><span id="desktopValue">28</span> px</div>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="desktopSize" min="16" max="60" value="28" 
+                                   oninput="updateSlider('desktop')">
+                        </div>
+                        <div class="slider-scale">
+                            <span>很小 16</span>
+                            <span>普通 36</span>
+                            <span>很大 60</span>
+                        </div>
+                        <div class="slider-desc">💡 建議 24-36 之間，太大會很擠</div>
+                    </div>
+                    
+                    <!-- 手機版字體 -->
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <label>📱 手機上看到的大小</label>
+                            <div class="slider-value"><span id="mobileValue">20</span> px</div>
+                        </div>
+                        <div class="slider-container">
+                            <input type="range" id="mobileSize" min="12" max="40" value="20" 
+                                   oninput="updateSlider('mobile')">
+                        </div>
+                        <div class="slider-scale">
+                            <span>很小 12</span>
+                            <span>普通 24</span>
+                            <span>很大 40</span>
+                        </div>
+                        <div class="slider-desc">💡 建議 18-28 之間，手機螢幕小</div>
+                    </div>
+                </div>
+                
+                <!-- 即時預覽 -->
+                <div class="live-preview">
+                    <div class="preview-screen" id="previewScreen">
+                        <div class="preview-stars" id="previewStars"></div>
+                        <div class="ending-text" id="previewText">
+                            這是屬於 小明 的 INFP 專屬時刻
+                        </div>
+                        <div class="preview-label">👁️ 即時預覽</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 步驟 4: 時間設定 -->
+        <div class="step-card" id="step4">
+            <div class="step-header">
+                <div class="step-number">4</div>
+                <div class="step-title">
+                    <h3>顯示多久？淡入淡出多快？</h3>
+                    <p>控制文字出現和消失的時間</p>
+                </div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+                <!-- 顯示時長 -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>⏱️ 總共顯示幾秒</label>
+                        <div class="slider-value"><span id="durationValue">8</span> 秒</div>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="duration" min="3" max="15" value="8" 
+                               oninput="updateSlider('duration')">
+                    </div>
+                    <div class="slider-desc">💡 建議 6-10 秒，太短來不及看</div>
+                </div>
+                
+                <!-- 淡入時間 -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>🌅 淡入時間</label>
+                        <div class="slider-value"><span id="fadeInValue">1.5</span> 秒</div>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="fadeIn" min="0.5" max="5" value="1.5" step="0.5"
+                               oninput="updateSlider('fadeIn')">
+                    </div>
+                    <div class="slider-desc">💡 文字慢慢出現要多久</div>
+                </div>
+                
+                <!-- 淡出時間 -->
+                <div class="slider-group">
+                    <div class="slider-header">
+                        <label>🌇 淡出時間</label>
+                        <div class="slider-value"><span id="fadeOutValue">2</span> 秒</div>
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="fadeOut" min="0.5" max="5" value="2" step="0.5"
+                               oninput="updateSlider('fadeOut')">
+                    </div>
+                    <div class="slider-desc">💡 文字慢慢消失要多久</div>
+                </div>
+            </div>
+            
+            <div class="tip-box" style="margin-top: 20px;">
+                <strong>🎬 時間軸說明</strong>
+                <p>
+                    假設設定「顯示 8 秒」「淡入 1.5 秒」「淡出 2 秒」：<br>
+                    📍 影片結束前 8 秒 → 文字開始淡入<br>
+                    📍 1.5 秒後 → 文字完全顯示<br>
+                    📍 再過 4.5 秒 → 文字開始淡出<br>
+                    📍 2 秒後 → 文字完全消失（剛好影片結束）
+                </p>
+            </div>
+        </div>
+        
+        <!-- 儲存 -->
+        <div class="save-section">
+            <button class="save-btn" onclick="saveSettings()">
+                💾 儲存設定
+            </button>
+            <p style="margin-top: 15px; color: #666;">
+                設定會自動套用到所有新產生的影片
+            </p>
+        </div>
+    </div>
+    
+    <!-- 成功提示 -->
+    <div class="toast" id="toast">✅ 設定已儲存成功！</div>
+    
+    <script>
+        // ========================================
+        // 初始化
+        // ========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 載入現有設定
+            await loadSettings();
+            
+            // 生成預覽星星
+            generateStars();
+            
+            // 更新預覽
+            updatePreview();
+        });
+        
+        // ========================================
+        // 載入設定
+        // ========================================
+        async function loadSettings() {
+            try {
+                const response = await fetch('/api/config/custom-ending');
+                const settings = await response.json();
+                
+                // 套用設定
+                const isEnabled = settings.enabled !== false;
+                document.getElementById('mainSwitch').classList.toggle('on', isEnabled);
+                document.getElementById('switchStatus').textContent = isEnabled ? '已開啟' : '已關閉';
+                toggleSteps(isEnabled);
+                
+                document.getElementById('endingText').value = settings.template || '這是屬於 {name} 的 {mbti} 專屬時刻';
+                document.getElementById('desktopSize').value = settings.fontSize || 28;
+                document.getElementById('mobileSize').value = settings.fontSizeMobile || 20;
+                document.getElementById('duration').value = settings.duration || 8;
+                document.getElementById('fadeIn').value = settings.fadeInDuration || 1.5;
+                document.getElementById('fadeOut').value = settings.fadeOutDuration || 2;
+                
+                // 更新顯示
+                updateSlider('desktop');
+                updateSlider('mobile');
+                updateSlider('duration');
+                updateSlider('fadeIn');
+                updateSlider('fadeOut');
+                updatePreview();
+                
+                // 選中對應的模板
+                highlightMatchingTemplate(settings.template);
+                
+            } catch (error) {
+                console.error('載入設定失敗:', error);
+            }
+        }
+        
+        // ========================================
+        // 開關
+        // ========================================
+        function toggleSwitch() {
+            const sw = document.getElementById('mainSwitch');
+            const isOn = !sw.classList.contains('on');
+            sw.classList.toggle('on', isOn);
+            document.getElementById('switchStatus').textContent = isOn ? '已開啟' : '已關閉';
+            toggleSteps(isOn);
+        }
+        
+        function toggleSteps(show) {
+            ['step2', 'step3', 'step4'].forEach(id => {
+                document.getElementById(id).style.opacity = show ? '1' : '0.5';
+                document.getElementById(id).style.pointerEvents = show ? 'auto' : 'none';
+            });
+        }
+        
+        // ========================================
+        // 模板選擇
+        // ========================================
+        function selectTemplate(element, template) {
+            // 移除其他選中
+            document.querySelectorAll('.template-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            // 更新輸入框
+            document.getElementById('endingText').value = template;
+            updatePreview();
+        }
+        
+        function highlightMatchingTemplate(template) {
+            document.querySelectorAll('.template-option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            const templates = [
+                '這是屬於 {name} 的 {mbti} 專屬時刻',
+                '獻給獨一無二的 {name}',
+                '{name}，{mbti} 的你最特別',
+                '專屬於 {name} 的療癒時光'
+            ];
+            
+            const index = templates.indexOf(template);
+            if (index >= 0) {
+                document.querySelectorAll('.template-option')[index]?.classList.add('selected');
+            }
+        }
+        
+        // ========================================
+        // 插入變數
+        // ========================================
+        function insertVariable(variable) {
+            const input = document.getElementById('endingText');
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const value = input.value;
+            
+            input.value = value.substring(0, start) + variable + value.substring(end);
+            input.focus();
+            input.setSelectionRange(start + variable.length, start + variable.length);
+            
+            updatePreview();
+        }
+        
+        // ========================================
+        // 滑桿更新
+        // ========================================
+        function updateSlider(type) {
+            const map = {
+                desktop: { slider: 'desktopSize', display: 'desktopValue' },
+                mobile: { slider: 'mobileSize', display: 'mobileValue' },
+                duration: { slider: 'duration', display: 'durationValue' },
+                fadeIn: { slider: 'fadeIn', display: 'fadeInValue' },
+                fadeOut: { slider: 'fadeOut', display: 'fadeOutValue' }
+            };
+            
+            const config = map[type];
+            if (config) {
+                const value = document.getElementById(config.slider).value;
+                document.getElementById(config.display).textContent = value;
+            }
+            
+            updatePreview();
+        }
+        
+        // ========================================
+        // 更新預覽
+        // ========================================
+        function updatePreview() {
+            const template = document.getElementById('endingText').value;
+            const fontSize = document.getElementById('desktopSize').value;
+            
+            // 替換變數為示範值
+            const previewText = template
+                .replace('{name}', '小明')
+                .replace('{mbti}', 'INFP');
+            
+            const preview = document.getElementById('previewText');
+            preview.textContent = previewText;
+            preview.style.fontSize = fontSize + 'px';
+        }
+        
+        // ========================================
+        // 生成星星
+        // ========================================
+        function generateStars() {
+            const container = document.getElementById('previewStars');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 30; i++) {
+                const star = document.createElement('div');
+                star.className = 'preview-star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = (Math.random() * 2 + 1) + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+        }
+        
+        // ========================================
+        // 儲存設定
+        // ========================================
+        async function saveSettings() {
+            const settings = {
+                enabled: document.getElementById('mainSwitch').classList.contains('on'),
+                template: document.getElementById('endingText').value,
+                fontSize: parseInt(document.getElementById('desktopSize').value),
+                fontSizeMobile: parseInt(document.getElementById('mobileSize').value),
+                duration: parseInt(document.getElementById('duration').value),
+                fadeInDuration: parseFloat(document.getElementById('fadeIn').value),
+                fadeOutDuration: parseFloat(document.getElementById('fadeOut').value)
+            };
+            
+            try {
+                const response = await fetch('/api/config/custom-ending', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(settings)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showToast('✅ 設定已儲存成功！');
+                } else {
+                    showToast('❌ 儲存失敗，請重試', false);
+                }
+                
+            } catch (error) {
+                showToast('❌ 儲存失敗: ' + error.message, false);
+            }
+        }
+        
+        // ========================================
+        // 顯示提示
+        // ========================================
+        function showToast(message, success = true) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.style.background = success ? '#4caf50' : '#f44336';
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

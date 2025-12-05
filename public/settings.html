@@ -3,101 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>設定 - SoulTalk Tool v2.0</title>
+    <title>SoulTalk V2 - 設定</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            font-family: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f5f5;
             min-height: 100vh;
+            color: #333;
+        }
+        
+        /* 頂部導航 */
+        .navbar {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
             color: #fff;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .header {
+            padding: 15px 20px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            margin-bottom: 30px;
+            gap: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
-        .header h1 { font-size: 24px; }
-        
-        .back-btn {
-            color: rgba(255,255,255,0.7);
+        .navbar a {
+            color: rgba(255,255,255,0.8);
             text-decoration: none;
             padding: 8px 16px;
             border-radius: 8px;
             transition: all 0.3s;
         }
         
-        .back-btn:hover {
-            color: #fff;
-            background: rgba(255,255,255,0.1);
+        .navbar a:hover { background: rgba(255,255,255,0.1); }
+        .navbar h1 { font-size: 1.3rem; flex: 1; }
+        
+        /* 主容器 */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
         }
         
-        /* Tab 導航 */
+        /* 分頁標籤 */
         .tabs {
             display: flex;
-            gap: 5px;
+            gap: 10px;
             margin-bottom: 30px;
             flex-wrap: wrap;
         }
         
-        .tab-btn {
+        .tab {
             padding: 12px 24px;
-            border: none;
-            background: rgba(255,255,255,0.05);
-            color: rgba(255,255,255,0.7);
-            border-radius: 10px 10px 0 0;
+            background: #fff;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 1rem;
             transition: all 0.3s;
         }
         
-        .tab-btn:hover {
-            background: rgba(255,255,255,0.1);
+        .tab:hover { border-color: #9c27b0; }
+        .tab.active {
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
             color: #fff;
+            border-color: transparent;
         }
-        
-        .tab-btn.active {
-            background: rgba(255,255,255,0.15);
-            color: #fff;
-            font-weight: bold;
-        }
-        
-        /* Tab 內容 */
-        .tab-content {
-            display: none;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 0 15px 15px 15px;
-            padding: 30px;
-        }
-        
-        .tab-content.active { display: block; }
         
         /* 設定區塊 */
-        .config-section {
+        .settings-section {
+            background: #fff;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        
+        .settings-section.active { display: block; }
+        
+        .section-title {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* 說明框 */
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px 20px;
+            border-radius: 0 10px 10px 0;
+            margin-bottom: 25px;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .info-box.warning {
+            background: #fff3e0;
+            border-color: #ff9800;
+        }
+        
+        .info-box.success {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+        
+        /* 顏色組設定 */
+        .color-groups {
             margin-bottom: 30px;
         }
         
-        .config-section h3 {
-            font-size: 18px;
+        .color-groups h4 {
+            font-size: 1.1rem;
             margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            color: #666;
         }
         
-        /* 表單元素 */
+        .color-group {
+            background: #fafafa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .color-group-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .color-group-name {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 150px;
+        }
+        
+        /* 顏色選擇器 */
+        .color-pickers {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .color-picker {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .color-picker label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        
+        .color-picker input[type="color"] {
+            width: 50px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        .color-picker input[type="text"] {
+            width: 90px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        /* 方向選擇 */
+        .direction-select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            background: #fff;
+        }
+        
+        /* 預覽 */
+        .color-preview {
+            width: 100%;
+            height: 60px;
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        /* MBTI 勾選 */
+        .mbti-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .mbti-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .mbti-checkbox:hover {
+            border-color: #9c27b0;
+        }
+        
+        .mbti-checkbox.checked {
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            color: #fff;
+            border-color: transparent;
+        }
+        
+        .mbti-checkbox input {
+            display: none;
+        }
+        
+        /* 按鈕 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
+            color: #fff;
+        }
+        
+        .btn-primary:hover { transform: scale(1.02); }
+        
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .btn-danger {
+            background: #f44336;
+            color: #fff;
+        }
+        
+        .btn-success {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .btn-add {
+            background: #2196f3;
+            color: #fff;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+        
+        /* 表單項目 */
         .form-group {
             margin-bottom: 20px;
         }
@@ -105,962 +283,869 @@
         .form-group label {
             display: block;
             margin-bottom: 8px;
-            color: rgba(255,255,255,0.8);
-            font-size: 14px;
+            font-weight: 500;
+            color: #555;
         }
         
         .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-group textarea,
+        .form-group select {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 8px;
-            background: rgba(0,0,0,0.2);
-            color: #fff;
-            font-size: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
         
         .form-group input:focus,
-        .form-group select:focus,
         .form-group textarea:focus {
+            border-color: #9c27b0;
             outline: none;
-            border-color: #667eea;
         }
         
-        .form-group textarea {
-            min-height: 150px;
-            font-family: monospace;
-        }
-        
-        .form-group small {
-            display: block;
-            margin-top: 5px;
-            color: rgba(255,255,255,0.5);
-            font-size: 12px;
-        }
-        
-        /* 表格樣式 */
-        .config-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        .config-table th,
-        .config-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .config-table th {
-            color: rgba(255,255,255,0.6);
-            font-weight: normal;
-            font-size: 13px;
-        }
-        
-        .config-table input {
-            padding: 8px 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
-            background: rgba(0,0,0,0.2);
-            color: #fff;
-            font-size: 13px;
-            width: 100%;
-        }
-        
-        .config-table select {
-            padding: 8px 12px;
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 6px;
-            background: rgba(0,0,0,0.2);
-            color: #fff;
-            font-size: 13px;
-        }
-        
-        /* 按鈕 */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-        }
-        
-        .btn-success {
-            background: linear-gradient(135deg, #4caf50, #2e7d32);
-            color: #fff;
-        }
-        
-        .btn-danger {
-            background: linear-gradient(135deg, #f44336, #c62828);
-            color: #fff;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        
-        /* 狀態訊息 */
-        .message {
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .message.show { display: block; }
-        .message.success { background: rgba(76,175,80,0.2); border: 1px solid #4caf50; }
-        .message.error { background: rgba(244,67,54,0.2); border: 1px solid #f44336; }
-        
-        /* API 列表 */
-        .api-list {
+        .form-row {
             display: grid;
-            gap: 15px;
-        }
-        
-        .api-item {
-            background: rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 10px;
-            padding: 15px;
-        }
-        
-        .api-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .api-item-name {
-            font-weight: bold;
-        }
-        
-        .api-item-actions {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .api-item-actions button {
-            padding: 5px 12px;
-            font-size: 12px;
-            border-radius: 5px;
-        }
-        
-        .api-item-details {
-            font-size: 13px;
-            color: rgba(255,255,255,0.6);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
         
         /* 開關 */
-        .toggle {
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: #fafafa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .switch {
             position: relative;
             width: 50px;
             height: 26px;
         }
         
-        .toggle input {
+        .switch input {
             opacity: 0;
             width: 0;
             height: 0;
         }
         
-        .toggle-slider {
+        .slider {
             position: absolute;
             cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255,255,255,0.2);
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #ccc;
+            transition: 0.4s;
             border-radius: 26px;
-            transition: 0.3s;
         }
         
-        .toggle-slider:before {
+        .slider:before {
             position: absolute;
             content: "";
             height: 20px;
             width: 20px;
             left: 3px;
             bottom: 3px;
-            background: #fff;
+            background: white;
+            transition: 0.4s;
             border-radius: 50%;
-            transition: 0.3s;
         }
         
-        .toggle input:checked + .toggle-slider {
-            background: #4caf50;
+        input:checked + .slider {
+            background: linear-gradient(135deg, #e91e63, #9c27b0);
         }
         
-        .toggle input:checked + .toggle-slider:before {
+        input:checked + .slider:before {
             transform: translateX(24px);
+        }
+        
+        /* 儲存提示 */
+        .save-toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #4caf50;
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .save-toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        /* 結尾預覽 */
+        .ending-preview {
+            background: linear-gradient(135deg, #1a1a2e, #0f3460);
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin: 20px 0;
+            aspect-ratio: 1;
+            max-width: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ending-preview .text {
+            color: #fff;
+            font-weight: 500;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: fadeInOut 4s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+        
+        /* RWD */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            .tabs { gap: 5px; }
+            .tab { padding: 10px 15px; font-size: 0.9rem; }
+            .color-pickers { flex-direction: column; }
+            .mbti-checkboxes { grid-template-columns: repeat(4, 1fr); }
         }
     </style>
 </head>
 <body>
+    <!-- 導航 -->
+    <nav class="navbar">
+        <h1>⚙️ 設定</h1>
+        <a href="/">🏠 首頁</a>
+        <a href="/mv">🎬 MV</a>
+        <a href="/audio">🎤 語音</a>
+        <a href="/ending" style="background: rgba(102,126,234,0.3);">✨ 專屬結尾</a>
+    </nav>
+    
     <div class="container">
-        <header class="header">
-            <h1>⚙️ 系統設定</h1>
-            <div style="display: flex; gap: 10px; align-items: center;">
-                <button class="btn btn-success" onclick="exportSettings()" style="padding: 8px 16px;">💾 匯出設定</button>
-                <button class="btn btn-primary" onclick="showImportDialog()" style="padding: 8px 16px;">📥 匯入設定</button>
-                <a href="/" class="back-btn">← 返回主頁</a>
-            </div>
-        </header>
-        
-        <!-- 匯入對話框 -->
-        <div id="importDialog" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; padding: 50px;">
-            <div style="max-width: 600px; margin: 0 auto; background: #1a1a2e; border-radius: 15px; padding: 30px;">
-                <h2 style="margin-bottom: 20px;">📥 匯入設定</h2>
-                <p style="margin-bottom: 15px; color: rgba(255,255,255,0.7);">
-                    貼上從「匯出設定」下載的 JSON 內容，或上傳備份檔案
-                </p>
-                <textarea id="importJson" style="width: 100%; height: 200px; background: #000; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; padding: 15px; font-family: monospace; font-size: 12px;" placeholder="貼上 JSON 內容..."></textarea>
-                <div style="margin-top: 15px;">
-                    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImportFile(event)">
-                    <button class="btn" onclick="document.getElementById('importFile').click()" style="background: rgba(255,255,255,0.1);">📁 選擇檔案</button>
-                </div>
-                <div style="margin-top: 20px; display: flex; gap: 10px;">
-                    <button class="btn btn-success" onclick="doImport()">✅ 確認匯入</button>
-                    <button class="btn" onclick="hideImportDialog()" style="background: rgba(255,255,255,0.1);">取消</button>
-                </div>
-            </div>
-        </div>
-        
-        <div class="message" id="message"></div>
-        
-        <!-- Tab 導航 -->
+        <!-- 分頁標籤 -->
         <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('api')">🔑 API 設定</button>
-            <button class="tab-btn" onclick="switchTab('region')">🌏 地區設定</button>
-            <button class="tab-btn" onclick="switchTab('ragic')">📊 Ragic 設定</button>
-            <button class="tab-btn" onclick="switchTab('notify')">📢 通知設定</button>
-            <button class="tab-btn" onclick="switchTab('subtitle')">🎨 字幕樣式</button>
-            <button class="tab-btn" onclick="switchTab('rules')">📐 計算規則</button>
-            <button class="tab-btn" onclick="switchTab('prompts')">📝 提示詞</button>
+            <div class="tab active" data-tab="mbti-colors">🎨 MBTI 顏色</div>
+            <a href="/ending" class="tab" style="text-decoration: none;">✨ 專屬結尾 →</a>
+            <div class="tab" data-tab="images">🖼️ 圖片分類</div>
+            <div class="tab" data-tab="subtitle">📝 字幕設定</div>
+            <div class="tab" data-tab="notifications">🔔 通知設定</div>
         </div>
         
-        <!-- API 設定 -->
-        <div class="tab-content active" id="tab-api">
-            <div class="config-section">
-                <h3>🎤 語音識別 API</h3>
-                <div class="api-list" id="transcriptionApiList">
-                    <!-- 動態生成 -->
+        <!-- 專屬結尾快捷入口 -->
+        <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; border-radius: 15px; padding: 25px; margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h3 style="margin-bottom: 8px;">✨ 專屬結尾設定</h3>
+                    <p style="opacity: 0.9;">影片最後 8 秒顯示專屬文字，慢慢淡入淡出</p>
                 </div>
-            </div>
-            
-            <div class="config-section">
-                <h3>🤖 AI 模型</h3>
-                <div class="api-list" id="aiModelList">
-                    <!-- 動態生成 -->
-                </div>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveApiConfig()">💾 儲存設定</button>
-                <button class="btn btn-danger" onclick="reloadConfig()">🔄 重新載入</button>
-            </div>
-        </div>
-        
-        <!-- 地區設定 -->
-        <div class="tab-content" id="tab-region">
-            <div class="config-section">
-                <h3>🎵 MV 模式 - 地區 API 對應</h3>
-                <table class="config-table">
-                    <thead>
-                        <tr>
-                            <th>地區</th>
-                            <th>使用的 API</th>
-                        </tr>
-                    </thead>
-                    <tbody id="mvRegionTable">
-                        <!-- 動態生成 -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="config-section">
-                <h3>🎙️ 語音模式 - 地區 API 對應</h3>
-                <table class="config-table">
-                    <thead>
-                        <tr>
-                            <th>地區</th>
-                            <th>使用的 API</th>
-                        </tr>
-                    </thead>
-                    <tbody id="audioRegionTable">
-                        <!-- 動態生成 -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveRegionConfig()">💾 儲存設定</button>
-            </div>
-        </div>
-        
-        <!-- Ragic 設定 -->
-        <div class="tab-content" id="tab-ragic">
-            <div class="config-section">
-                <h3>🔗 連線設定</h3>
-                <div class="form-group">
-                    <label>Base URL</label>
-                    <input type="text" id="ragicBaseUrl" placeholder="https://ap13.ragic.com">
-                </div>
-                <div class="form-group">
-                    <label>帳號</label>
-                    <input type="text" id="ragicAccount" placeholder="your-account">
-                </div>
-                <div class="form-group">
-                    <label>API Key (Base64)</label>
-                    <input type="password" id="ragicApiKey" placeholder="API Key">
-                </div>
-            </div>
-            
-            <div class="config-section">
-                <h3>🔌 N8N Webhook</h3>
-                <div class="form-group">
-                    <label>讀取資料 Webhook</label>
-                    <input type="text" id="n8nFetchUrl" placeholder="https://...">
-                </div>
-                <div class="form-group">
-                    <label>上傳 JSON Webhook</label>
-                    <input type="text" id="n8nUploadUrl" placeholder="https://...">
-                </div>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveRagicConfig()">💾 儲存設定</button>
-            </div>
-        </div>
-        
-        <!-- 通知設定 -->
-        <div class="tab-content" id="tab-notify">
-            <div class="config-section">
-                <h3>📱 Telegram</h3>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        啟用 Telegram 通知
-                        <label class="toggle">
-                            <input type="checkbox" id="telegramEnabled">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>Bot Token</label>
-                    <input type="password" id="telegramBotToken" placeholder="123456:ABC-DEF...">
-                </div>
-                <div class="form-group">
-                    <label>Chat ID</label>
-                    <input type="text" id="telegramChatId" placeholder="-1001234567890">
-                </div>
-            </div>
-            
-            <div class="config-section">
-                <h3>📧 Email</h3>
-                <div class="form-group">
-                    <label style="display: flex; align-items: center; gap: 10px;">
-                        啟用 Email 通知
-                        <label class="toggle">
-                            <input type="checkbox" id="emailEnabled">
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </label>
-                </div>
-                <div class="form-group">
-                    <label>SMTP Host</label>
-                    <input type="text" id="emailSmtpHost" placeholder="smtp.gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>SMTP User</label>
-                    <input type="text" id="emailSmtpUser" placeholder="your@gmail.com">
-                </div>
-                <div class="form-group">
-                    <label>SMTP Password</label>
-                    <input type="password" id="emailSmtpPass" placeholder="App Password">
-                </div>
-            </div>
-            
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveNotifyConfig()">💾 儲存設定</button>
-                <button class="btn btn-success" onclick="testNotify()">🧪 測試通知</button>
-            </div>
-        </div>
-        
-        <!-- 字幕樣式 -->
-        <div class="tab-content" id="tab-subtitle">
-            <div class="config-section">
-                <p style="color: rgba(255,255,255,0.8); margin-bottom: 20px;">
-                    字幕樣式設定已移至獨立頁面，提供更完整的視覺化調整功能。
-                </p>
-                <a href="/subtitle-styles.html" class="btn btn-primary" target="_blank">
-                    🎨 開啟字幕樣式設定
+                <a href="/ending" style="background: #fff; color: #667eea; padding: 12px 30px; border-radius: 10px; text-decoration: none; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    👉 點我設定（超簡單！）
                 </a>
             </div>
         </div>
         
-        <!-- 計算規則 -->
-        <div class="tab-content" id="tab-rules">
-            <div class="config-section">
-                <h3>⏱️ 時間計算規則</h3>
-                <table class="config-table">
-                    <tr>
-                        <td>每字估計時間</td>
-                        <td><input type="number" id="charEstimateTime" step="0.01" value="0.35"> 秒</td>
-                    </tr>
-                    <tr>
-                        <td>緩衝時間</td>
-                        <td><input type="number" id="bufferTime" step="0.1" value="2"> 秒</td>
-                    </tr>
-                    <tr>
-                        <td>最大持續時間</td>
-                        <td><input type="number" id="maxDuration" step="1" value="12"> 秒</td>
-                    </tr>
-                    <tr>
-                        <td>MV 間奏隱藏閾值</td>
-                        <td><input type="number" id="mvGapThreshold" step="0.1" value="0.8"> 秒</td>
-                    </tr>
-                    <tr>
-                        <td>語音間奏隱藏閾值</td>
-                        <td><input type="number" id="audioGapThreshold" step="0.1" value="1.5"> 秒</td>
-                    </tr>
-                </table>
+        <!-- ========================================
+             MBTI 顏色設定
+        ======================================== -->
+        <div class="settings-section active" id="section-mbti-colors">
+            <div class="section-title">🎨 MBTI 背景顏色設定</div>
+            
+            <div class="info-box">
+                <strong>💡 這是什麼？</strong><br>
+                根據用戶的「性別」和「MBTI」自動套用不同的背景顏色。<br><br>
+                <strong>怎麼用？</strong><br>
+                1️⃣ 設定顏色組（3 個顏色 + 漸層方向）<br>
+                2️⃣ 勾選這組顏色要套用給哪些 MBTI<br>
+                3️⃣ 載入資料時會自動配對！
             </div>
             
-            <div class="config-section">
-                <h3>📏 分行規則</h3>
-                <table class="config-table">
-                    <tr>
-                        <td>MV 模式 - 最小字數</td>
-                        <td><input type="number" id="mvMinChars" value="6"> 字</td>
-                    </tr>
-                    <tr>
-                        <td>MV 模式 - 最大字數</td>
-                        <td><input type="number" id="mvMaxChars" value="20"> 字</td>
-                    </tr>
-                    <tr>
-                        <td>語音模式 - 最小字數</td>
-                        <td><input type="number" id="audioMinChars" value="5"> 字</td>
-                    </tr>
-                    <tr>
-                        <td>語音模式 - 最大字數</td>
-                        <td><input type="number" id="audioMaxChars" value="12"> 字</td>
-                    </tr>
-                </table>
+            <!-- 男性顏色組 -->
+            <div class="color-groups" id="male-groups">
+                <h4>👨 男性背景顏色</h4>
+                <!-- 動態生成 -->
+            </div>
+            <button class="btn btn-add" onclick="addColorGroup('male')">➕ 新增男性顏色組</button>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 2px dashed #e0e0e0;">
+            
+            <!-- 女性顏色組 -->
+            <div class="color-groups" id="female-groups">
+                <h4>👩 女性背景顏色</h4>
+                <!-- 動態生成 -->
+            </div>
+            <button class="btn btn-add" onclick="addColorGroup('female')">➕ 新增女性顏色組</button>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 2px dashed #e0e0e0;">
+            
+            <!-- MBTI 視覺參數 -->
+            <div class="section-title" style="margin-top: 30px;">🌟 MBTI 視覺參數</div>
+            
+            <div class="info-box">
+                <strong>💡 進階功能</strong><br>
+                根據 MBTI 的字母自動調整視覺效果，讓每種類型都有獨特的感覺。
             </div>
             
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="saveRulesConfig()">💾 儲存設定</button>
+            <div class="switch-group">
+                <label class="switch">
+                    <input type="checkbox" id="visual-enabled" checked>
+                    <span class="slider"></span>
+                </label>
+                <div>
+                    <strong>啟用 MBTI 視覺調整</strong>
+                    <div style="font-size: 0.85rem; color: #666;">根據 MBTI 字母自動調整星星、流星等效果</div>
+                </div>
+            </div>
+            
+            <div class="form-row" id="visual-params">
+                <div class="form-group">
+                    <label>T 型星星數量（理性型，較少）</label>
+                    <input type="number" id="starsT" value="40" min="10" max="100">
+                </div>
+                <div class="form-group">
+                    <label>F 型星星數量（感性型，較多）</label>
+                    <input type="number" id="starsF" value="80" min="10" max="100">
+                </div>
+                <div class="form-group">
+                    <label>P 型流星數量（隨性型，較多）</label>
+                    <input type="number" id="shootingP" value="5" min="1" max="10">
+                </div>
+                <div class="form-group">
+                    <label>J 型流星數量（計劃型，較少）</label>
+                    <input type="number" id="shootingJ" value="2" min="1" max="10">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveMBTIColors()">💾 儲存 MBTI 顏色設定</button>
+        </div>
+        
+        <!-- ========================================
+             專屬結尾設定 - 已移至專屬頁面
+        ======================================== -->
+        <div class="settings-section" id="section-ending">
+            <div class="section-title">✨ 專屬結尾設定</div>
+            
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="font-size: 4rem; margin-bottom: 20px;">✨</div>
+                <h3 style="margin-bottom: 15px;">專屬結尾有了新的設定頁面！</h3>
+                <p style="color: #666; margin-bottom: 25px;">
+                    我們設計了一個超級簡單的設定介面<br>
+                    讓你輕鬆設定影片最後的專屬文字
+                </p>
+                <a href="/ending" style="display: inline-block; background: linear-gradient(135deg, #667eea, #764ba2); color: #fff; padding: 15px 40px; border-radius: 12px; text-decoration: none; font-size: 1.1rem; font-weight: bold; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                    👉 前往設定（超簡單！）
+                </a>
             </div>
         </div>
         
-        <!-- 提示詞 -->
-        <div class="tab-content" id="tab-prompts">
-            <div class="config-section">
-                <h3>🎵 MV 匹配提示詞</h3>
-                <div class="form-group">
-                    <textarea id="mvPrompt" rows="8" placeholder="MV 模式的 AI 提示詞..."></textarea>
+        <!-- ========================================
+             圖片分類設定
+        ======================================== -->
+        <div class="settings-section" id="section-images">
+            <div class="section-title">🖼️ 圖片標題自動分類</div>
+            
+            <div class="info-box">
+                <strong>💡 這是什麼？</strong><br>
+                根據圖片標題中的關鍵字，自動分類圖片類型。<br>
+                例如：標題是「動作圖1-R2」，如果 Transparent 設了「動作圖」，就會自動歸到去背圖。
+            </div>
+            
+            <div class="form-group">
+                <label>🖼️ Full（全幅圖）關鍵字</label>
+                <input type="text" id="keywords-full" placeholder="header,封面,cover,主視覺">
+                <div style="font-size: 0.85rem; color: #666; margin-top: 5px;">
+                    用逗號分隔多個關鍵字
                 </div>
             </div>
             
-            <div class="config-section">
-                <h3>🎙️ 語音匹配提示詞</h3>
+            <div class="form-group">
+                <label>🎭 Transparent（去背圖）關鍵字</label>
+                <input type="text" id="keywords-transparent" placeholder="Q版,動作圖,人物,主人物,去背">
+            </div>
+            
+            <div class="form-group">
+                <label>🌅 Background（背景圖）關鍵字</label>
+                <input type="text" id="keywords-background" placeholder="漫畫圖1,漫畫圖2,漫畫圖3,漫畫圖">
+            </div>
+            
+            <div class="form-group">
+                <label>📱 Static（靜態圖）關鍵字</label>
+                <input type="text" id="keywords-static" placeholder="靜態,static,語音封面">
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveImageKeywords()">💾 儲存圖片分類設定</button>
+        </div>
+        
+        <!-- ========================================
+             字幕設定
+        ======================================== -->
+        <div class="settings-section" id="section-subtitle">
+            <div class="section-title">📝 字幕設定</div>
+            
+            <div class="info-box">
+                <strong>💡 電腦/手機/全螢幕</strong><br>
+                不同裝置會自動套用對應的字體大小，確保在任何螢幕上都清晰可讀。
+            </div>
+            
+            <h4 style="margin-bottom: 15px;">字幕大小</h4>
+            <div class="form-row">
                 <div class="form-group">
-                    <textarea id="audioPrompt" rows="8" placeholder="語音模式的 AI 提示詞..."></textarea>
+                    <label>💻 電腦版 (px)</label>
+                    <input type="number" id="subtitle-fontSize" value="28" min="16" max="60">
+                </div>
+                <div class="form-group">
+                    <label>📱 手機版 (px)</label>
+                    <input type="number" id="subtitle-fontSizeMobile" value="22" min="12" max="40">
+                </div>
+                <div class="form-group">
+                    <label>🖥️ 全螢幕 (px)</label>
+                    <input type="number" id="subtitle-fontSizeFullscreen" value="36" min="20" max="80">
                 </div>
             </div>
             
-            <div class="config-section">
-                <h3>✏️ 校正提示詞</h3>
+            <h4 style="margin: 25px 0 15px;">字幕顏色</h4>
+            <div class="form-row">
                 <div class="form-group">
-                    <textarea id="correctionPrompt" rows="8" placeholder="字幕校正的 AI 提示詞..."></textarea>
+                    <label>未唱顏色</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="color" id="subtitle-unsungColor" value="#ffffff" style="width: 60px; height: 40px;">
+                        <input type="text" id="subtitle-unsungColorText" value="#ffffff" style="width: 100px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>已唱顏色（MV 模式）</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="color" id="subtitle-sungColor" value="#4d4d4d" style="width: 60px; height: 40px;">
+                        <input type="text" id="subtitle-sungColorText" value="#4d4d4d" style="width: 100px;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>描邊顏色</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="color" id="subtitle-borderColor" value="#ffffff" style="width: 60px; height: 40px;">
+                        <input type="text" id="subtitle-borderColorText" value="#ffffff" style="width: 100px;">
+                    </div>
                 </div>
             </div>
             
-            <div class="btn-group">
-                <button class="btn btn-primary" onclick="savePromptsConfig()">💾 儲存設定</button>
-                <button class="btn btn-danger" onclick="resetPrompts()">🔄 恢復預設</button>
+            <h4 style="margin: 25px 0 15px;">字間距</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>MV 模式字間距 (em)</label>
+                    <input type="number" id="subtitle-letterSpacingMV" value="0.05" min="0" max="0.5" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>語音模式字間距 (em)</label>
+                    <input type="number" id="subtitle-letterSpacingAudio" value="0.08" min="0" max="0.5" step="0.01">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="saveSubtitle()">💾 儲存字幕設定</button>
+        </div>
+        
+        <!-- ========================================
+             通知設定
+        ======================================== -->
+        <div class="settings-section" id="section-notifications">
+            <div class="section-title">🔔 通知設定</div>
+            
+            <div class="info-box">
+                <strong>💡 Telegram 通知</strong><br>
+                上傳完成時自動發送通知到你的 Telegram。
+            </div>
+            
+            <div class="switch-group">
+                <label class="switch">
+                    <input type="checkbox" id="telegram-enabled">
+                    <span class="slider"></span>
+                </label>
+                <div>
+                    <strong>啟用 Telegram 通知</strong>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Bot Token</label>
+                <input type="text" id="telegram-botToken" placeholder="從 @BotFather 取得">
+            </div>
+            
+            <div class="form-group">
+                <label>Chat ID</label>
+                <input type="text" id="telegram-chatId" placeholder="你的 Telegram Chat ID">
+            </div>
+            
+            <div style="display: flex; gap: 15px; margin-top: 20px;">
+                <button class="btn btn-success" onclick="testTelegram()">🧪 測試通知</button>
+                <button class="btn btn-primary" onclick="saveNotifications()">💾 儲存通知設定</button>
             </div>
         </div>
     </div>
     
+    <!-- 儲存提示 -->
+    <div class="save-toast" id="saveToast">✅ 設定已儲存！</div>
+    
     <script>
-        let configs = {};
+        // ========================================
+        // 全域變數
+        // ========================================
+        let config = {};
+        const ALL_MBTI = ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'INFJ', 'INFP', 'ENFJ', 'ENFP', 
+                         'ISTJ', 'ISFJ', 'ESTJ', 'ESFJ', 'ISTP', 'ISFP', 'ESTP', 'ESFP'];
         
-        // 切換 Tab
-        function switchTab(tabId) {
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        // ========================================
+        // 初始化
+        // ========================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            // 載入設定
+            await loadConfig();
             
-            document.querySelector(`[onclick="switchTab('${tabId}')"]`).classList.add('active');
-            document.getElementById('tab-' + tabId).classList.add('active');
-        }
+            // 分頁切換
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(`section-${tab.dataset.tab}`).classList.add('active');
+                });
+            });
+            
+            // 顏色同步
+            setupColorSync();
+            
+            // 結尾預覽更新
+            document.getElementById('ending-template').addEventListener('input', updateEndingPreview);
+            document.getElementById('ending-fontSize').addEventListener('input', updateEndingPreview);
+        });
         
-        // 載入所有設定
-        async function loadConfigs() {
+        // ========================================
+        // 載入設定
+        // ========================================
+        async function loadConfig() {
             try {
                 const response = await fetch('/api/config');
-                const data = await response.json();
+                config = await response.json();
+                console.log('✅ 設定已載入:', config);
                 
-                if (data.success) {
-                    configs = data.configs;
-                    renderConfigs();
-                }
+                renderMBTIColors();
+                renderEnding();
+                renderImageKeywords();
+                renderSubtitle();
+                renderNotifications();
+                
             } catch (error) {
-                showMessage('error', '載入設定失敗: ' + error.message);
+                console.error('❌ 載入設定失敗:', error);
+                showToast('載入設定失敗', false);
             }
         }
         
-        // 渲染設定到頁面
-        function renderConfigs() {
-            // 語音識別 API
-            if (configs['transcription-apis']) {
-                const list = document.getElementById('transcriptionApiList');
-                list.innerHTML = configs['transcription-apis'].apis.map(api => `
-                    <div class="api-item">
-                        <div class="api-item-header">
-                            <span class="api-item-name">${api.name}</span>
-                            <div class="api-item-actions">
-                                <button class="btn" onclick="editApi('transcription', '${api.id}')">編輯</button>
+        // ========================================
+        // MBTI 顏色渲染
+        // ========================================
+        function renderMBTIColors() {
+            const groups = config.mbtiColorGroups || { male: [], female: [] };
+            
+            renderColorGroups('male', groups.male || []);
+            renderColorGroups('female', groups.female || []);
+            
+            // 視覺參數
+            const visual = config.mbtiVisualParams || {};
+            document.getElementById('visual-enabled').checked = visual.enabled !== false;
+            document.getElementById('starsT').value = visual.starsT || 40;
+            document.getElementById('starsF').value = visual.starsF || 80;
+            document.getElementById('shootingP').value = visual.shootingP || 5;
+            document.getElementById('shootingJ').value = visual.shootingJ || 2;
+        }
+        
+        function renderColorGroups(gender, groups) {
+            const container = document.getElementById(`${gender}-groups`);
+            const title = gender === 'male' ? '👨 男性背景顏色' : '👩 女性背景顏色';
+            
+            let html = `<h4>${title}</h4>`;
+            
+            groups.forEach((group, index) => {
+                const colors = group.colors || ['#1a1a2e', '#16213e', '#0f3460'];
+                const direction = group.direction || 'to-bottom-right';
+                const gradientCSS = getGradientCSS(colors, direction);
+                
+                html += `
+                    <div class="color-group" data-gender="${gender}" data-index="${index}">
+                        <div class="color-group-header">
+                            <input type="text" class="color-group-name" value="${group.name || `顏色組 ${index + 1}`}" 
+                                   onchange="updateGroupName('${gender}', ${index}, this.value)">
+                            <select class="direction-select" onchange="updateDirection('${gender}', ${index}, this.value)">
+                                <option value="to-bottom" ${direction === 'to-bottom' ? 'selected' : ''}>↓ 上到下</option>
+                                <option value="to-right" ${direction === 'to-right' ? 'selected' : ''}>→ 左到右</option>
+                                <option value="to-bottom-right" ${direction === 'to-bottom-right' ? 'selected' : ''}>↘ 左上到右下</option>
+                                <option value="to-bottom-left" ${direction === 'to-bottom-left' ? 'selected' : ''}>↙ 右上到左下</option>
+                                <option value="radial" ${direction === 'radial' ? 'selected' : ''}>◎ 放射狀</option>
+                            </select>
+                            <button class="btn btn-danger" onclick="deleteColorGroup('${gender}', ${index})">🗑️ 刪除</button>
+                        </div>
+                        
+                        <div class="color-pickers">
+                            <div class="color-picker">
+                                <label>色1:</label>
+                                <input type="color" value="${colors[0]}" onchange="updateColor('${gender}', ${index}, 0, this.value)">
+                                <input type="text" value="${colors[0]}" onchange="updateColorFromText('${gender}', ${index}, 0, this.value)">
+                            </div>
+                            <div class="color-picker">
+                                <label>色2:</label>
+                                <input type="color" value="${colors[1]}" onchange="updateColor('${gender}', ${index}, 1, this.value)">
+                                <input type="text" value="${colors[1]}" onchange="updateColorFromText('${gender}', ${index}, 1, this.value)">
+                            </div>
+                            <div class="color-picker">
+                                <label>色3:</label>
+                                <input type="color" value="${colors[2]}" onchange="updateColor('${gender}', ${index}, 2, this.value)">
+                                <input type="text" value="${colors[2]}" onchange="updateColorFromText('${gender}', ${index}, 2, this.value)">
                             </div>
                         </div>
-                        <div class="api-item-details">
-                            ${api.type} | ${api.endpoint.substring(0, 40)}...
+                        
+                        <div class="color-preview" style="background: ${gradientCSS};"></div>
+                        
+                        <div style="font-size: 0.9rem; color: #666; margin-bottom: 10px;">勾選要套用此顏色的 MBTI：</div>
+                        <div class="mbti-checkboxes">
+                            ${ALL_MBTI.map(mbti => {
+                                const checked = (group.assignedMBTI || []).includes(mbti);
+                                return `
+                                    <label class="mbti-checkbox ${checked ? 'checked' : ''}" onclick="toggleMBTI('${gender}', ${index}, '${mbti}', this)">
+                                        <input type="checkbox" ${checked ? 'checked' : ''}>
+                                        ${mbti}
+                                    </label>
+                                `;
+                            }).join('')}
                         </div>
                     </div>
-                `).join('');
-            }
+                `;
+            });
             
-            // AI 模型
-            if (configs['ai-models']) {
-                const list = document.getElementById('aiModelList');
-                list.innerHTML = configs['ai-models'].models.map(model => `
-                    <div class="api-item">
-                        <div class="api-item-header">
-                            <span class="api-item-name">${model.name}</span>
-                            <div class="api-item-actions">
-                                <button class="btn" onclick="editModel('${model.id}')">編輯</button>
-                            </div>
-                        </div>
-                        <div class="api-item-details">
-                            ${model.modelId || model.id} | ${model.description || ''}
-                        </div>
-                    </div>
-                `).join('');
+            container.innerHTML = html;
+        }
+        
+        function getGradientCSS(colors, direction) {
+            if (direction === 'radial') {
+                return `radial-gradient(circle, ${colors[0]} 0%, ${colors[1]} 50%, ${colors[2]} 100%)`;
             }
+            const dirMap = {
+                'to-bottom': '180deg',
+                'to-right': '90deg',
+                'to-bottom-right': '135deg',
+                'to-bottom-left': '225deg'
+            };
+            return `linear-gradient(${dirMap[direction] || '135deg'}, ${colors[0]} 0%, ${colors[1]} 50%, ${colors[2]} 100%)`;
+        }
+        
+        function addColorGroup(gender) {
+            if (!config.mbtiColorGroups) config.mbtiColorGroups = { male: [], female: [] };
+            if (!config.mbtiColorGroups[gender]) config.mbtiColorGroups[gender] = [];
             
-            // 地區設定
-            if (configs['region-apis'] && configs['transcription-apis']) {
-                const regions = ['台灣', '香港', '澳門', '新加坡', '馬來西亞', '中國大陸'];
-                const apis = configs['transcription-apis'].apis;
-                
-                // MV 模式
-                document.getElementById('mvRegionTable').innerHTML = regions.map(region => `
-                    <tr>
-                        <td>${region}</td>
-                        <td>
-                            <select id="mvRegion_${region}">
-                                ${apis.map(api => `
-                                    <option value="${api.id}" ${configs['region-apis'].mv.regions[region] === api.id ? 'selected' : ''}>
-                                        ${api.name}
-                                    </option>
-                                `).join('')}
-                            </select>
-                        </td>
-                    </tr>
-                `).join('');
-                
-                // 語音模式
-                document.getElementById('audioRegionTable').innerHTML = regions.map(region => `
-                    <tr>
-                        <td>${region}</td>
-                        <td>
-                            <select id="audioRegion_${region}">
-                                ${apis.map(api => `
-                                    <option value="${api.id}" ${configs['region-apis'].audio.regions[region] === api.id ? 'selected' : ''}>
-                                        ${api.name}
-                                    </option>
-                                `).join('')}
-                            </select>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            config.mbtiColorGroups[gender].push({
+                id: `${gender}-${Date.now()}`,
+                name: `新顏色組`,
+                colors: ['#1a1a2e', '#16213e', '#0f3460'],
+                direction: 'to-bottom-right',
+                assignedMBTI: []
+            });
             
-            // Ragic 設定
-            if (configs.ragic) {
-                document.getElementById('ragicBaseUrl').value = configs.ragic.connection?.baseUrl || '';
-                document.getElementById('ragicAccount').value = configs.ragic.connection?.account || '';
-                document.getElementById('ragicApiKey').value = configs.ragic.connection?.apiKey || '';
-                document.getElementById('n8nFetchUrl').value = configs.ragic.n8nWebhook?.fetchData || '';
-                document.getElementById('n8nUploadUrl').value = configs.ragic.n8nWebhook?.uploadJson || '';
-            }
-            
-            // 通知設定
-            if (configs.notifications) {
-                const telegram = configs.notifications.channels?.telegram || {};
-                document.getElementById('telegramEnabled').checked = telegram.enabled || false;
-                document.getElementById('telegramBotToken').value = telegram.botToken || '';
-                document.getElementById('telegramChatId').value = telegram.chatId || '';
-                
-                const email = configs.notifications.channels?.email || {};
-                document.getElementById('emailEnabled').checked = email.enabled || false;
-                document.getElementById('emailSmtpHost').value = email.smtp?.host || '';
-                document.getElementById('emailSmtpUser').value = email.smtp?.user || '';
-                document.getElementById('emailSmtpPass').value = email.smtp?.pass || '';
-            }
-            
-            // 計算規則
-            if (configs['subtitle-rules']) {
-                const timing = configs['subtitle-rules'].timing || {};
-                document.getElementById('charEstimateTime').value = timing.charEstimateTime || 0.35;
-                document.getElementById('bufferTime').value = timing.bufferTime || 2;
-                document.getElementById('maxDuration').value = timing.maxDuration || 12;
-                document.getElementById('mvGapThreshold').value = timing.mvGapThreshold || 0.8;
-                document.getElementById('audioGapThreshold').value = timing.audioGapThreshold || 1.5;
-                
-                const lineBreaking = configs['subtitle-rules'].lineBreaking || {};
-                document.getElementById('mvMinChars').value = lineBreaking.mv?.minChars || 6;
-                document.getElementById('mvMaxChars').value = lineBreaking.mv?.maxChars || 20;
-                document.getElementById('audioMinChars').value = lineBreaking.audio?.minChars || 5;
-                document.getElementById('audioMaxChars').value = lineBreaking.audio?.maxChars || 12;
+            renderColorGroups(gender, config.mbtiColorGroups[gender]);
+        }
+        
+        function deleteColorGroup(gender, index) {
+            if (confirm('確定要刪除這個顏色組嗎？')) {
+                config.mbtiColorGroups[gender].splice(index, 1);
+                renderColorGroups(gender, config.mbtiColorGroups[gender]);
             }
         }
         
-        // 顯示訊息
-        function showMessage(type, text) {
-            const msg = document.getElementById('message');
-            msg.className = 'message show ' + type;
-            msg.textContent = text;
-            
-            setTimeout(() => {
-                msg.classList.remove('show');
-            }, 3000);
+        function updateGroupName(gender, index, name) {
+            config.mbtiColorGroups[gender][index].name = name;
         }
         
-        // 儲存設定
-        async function saveConfig(name, data) {
+        function updateDirection(gender, index, direction) {
+            config.mbtiColorGroups[gender][index].direction = direction;
+            renderColorGroups(gender, config.mbtiColorGroups[gender]);
+        }
+        
+        function updateColor(gender, index, colorIndex, value) {
+            config.mbtiColorGroups[gender][index].colors[colorIndex] = value;
+            renderColorGroups(gender, config.mbtiColorGroups[gender]);
+        }
+        
+        function updateColorFromText(gender, index, colorIndex, value) {
+            if (/^#[0-9A-Fa-f]{6}$/.test(value)) {
+                updateColor(gender, index, colorIndex, value);
+            }
+        }
+        
+        function toggleMBTI(gender, index, mbti, element) {
+            const group = config.mbtiColorGroups[gender][index];
+            if (!group.assignedMBTI) group.assignedMBTI = [];
+            
+            const mbtiIndex = group.assignedMBTI.indexOf(mbti);
+            if (mbtiIndex > -1) {
+                group.assignedMBTI.splice(mbtiIndex, 1);
+                element.classList.remove('checked');
+            } else {
+                // 先從其他組移除
+                config.mbtiColorGroups[gender].forEach((g, i) => {
+                    if (i !== index && g.assignedMBTI) {
+                        const idx = g.assignedMBTI.indexOf(mbti);
+                        if (idx > -1) g.assignedMBTI.splice(idx, 1);
+                    }
+                });
+                group.assignedMBTI.push(mbti);
+                element.classList.add('checked');
+            }
+            
+            // 重新渲染以更新其他組的顯示
+            renderColorGroups(gender, config.mbtiColorGroups[gender]);
+        }
+        
+        async function saveMBTIColors() {
             try {
-                const response = await fetch(`/api/config/${name}`, {
+                // 儲存顏色組
+                await fetch('/api/config/mbti-colors', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config.mbtiColorGroups)
+                });
+                
+                // 儲存視覺參數
+                const visualParams = {
+                    enabled: document.getElementById('visual-enabled').checked,
+                    starsT: parseInt(document.getElementById('starsT').value),
+                    starsF: parseInt(document.getElementById('starsF').value),
+                    shootingP: parseInt(document.getElementById('shootingP').value),
+                    shootingJ: parseInt(document.getElementById('shootingJ').value)
+                };
+                
+                await fetch('/api/config/mbti-visual', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(visualParams)
+                });
+                
+                showToast('MBTI 顏色設定已儲存！');
+            } catch (error) {
+                showToast('儲存失敗', false);
+            }
+        }
+        
+        // ========================================
+        // 專屬結尾
+        // ========================================
+        function renderEnding() {
+            const ending = config.customEnding || {};
+            document.getElementById('ending-enabled').checked = ending.enabled !== false;
+            document.getElementById('ending-template').value = ending.template || '這是屬於 {name} 的 {mbti} 專屬時刻';
+            document.getElementById('ending-fontSize').value = ending.fontSize || 28;
+            document.getElementById('ending-fontSizeMobile').value = ending.fontSizeMobile || 20;
+            document.getElementById('ending-duration').value = ending.duration || 8;
+            document.getElementById('ending-fadeIn').value = ending.fadeInDuration || 1.5;
+            document.getElementById('ending-fadeOut').value = ending.fadeOutDuration || 2;
+            updateEndingPreview();
+        }
+        
+        function updateEndingPreview() {
+            const template = document.getElementById('ending-template').value;
+            const fontSize = document.getElementById('ending-fontSize').value;
+            const previewText = template.replace('{name}', '小明').replace('{mbti}', 'INFP');
+            
+            const preview = document.getElementById('ending-preview-text');
+            preview.textContent = previewText;
+            preview.style.fontSize = fontSize + 'px';
+        }
+        
+        async function saveEnding() {
+            try {
+                const data = {
+                    enabled: document.getElementById('ending-enabled').checked,
+                    template: document.getElementById('ending-template').value,
+                    fontSize: parseInt(document.getElementById('ending-fontSize').value),
+                    fontSizeMobile: parseInt(document.getElementById('ending-fontSizeMobile').value),
+                    duration: parseInt(document.getElementById('ending-duration').value),
+                    fadeInDuration: parseFloat(document.getElementById('ending-fadeIn').value),
+                    fadeOutDuration: parseFloat(document.getElementById('ending-fadeOut').value)
+                };
+                
+                await fetch('/api/config/custom-ending', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                showToast('專屬結尾設定已儲存！');
+            } catch (error) {
+                showToast('儲存失敗', false);
+            }
+        }
+        
+        // ========================================
+        // 圖片分類
+        // ========================================
+        function renderImageKeywords() {
+            const keywords = config.imageKeywords || {};
+            document.getElementById('keywords-full').value = keywords.full || '';
+            document.getElementById('keywords-transparent').value = keywords.transparent || '';
+            document.getElementById('keywords-background').value = keywords.background || '';
+            document.getElementById('keywords-static').value = keywords.static || '';
+        }
+        
+        async function saveImageKeywords() {
+            try {
+                const data = {
+                    full: document.getElementById('keywords-full').value,
+                    transparent: document.getElementById('keywords-transparent').value,
+                    background: document.getElementById('keywords-background').value,
+                    static: document.getElementById('keywords-static').value
+                };
+                
+                await fetch('/api/config/image-keywords', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                showToast('圖片分類設定已儲存！');
+            } catch (error) {
+                showToast('儲存失敗', false);
+            }
+        }
+        
+        // ========================================
+        // 字幕設定
+        // ========================================
+        function renderSubtitle() {
+            const styles = config.subtitleStyles || {};
+            document.getElementById('subtitle-fontSize').value = styles.fontSize || 28;
+            document.getElementById('subtitle-fontSizeMobile').value = styles.fontSizeMobile || 22;
+            document.getElementById('subtitle-fontSizeFullscreen').value = styles.fontSizeFullscreen || 36;
+            document.getElementById('subtitle-unsungColor').value = styles.unsungColor || '#ffffff';
+            document.getElementById('subtitle-unsungColorText').value = styles.unsungColor || '#ffffff';
+            document.getElementById('subtitle-sungColor').value = styles.sungColor || '#4d4d4d';
+            document.getElementById('subtitle-sungColorText').value = styles.sungColor || '#4d4d4d';
+            document.getElementById('subtitle-borderColor').value = styles.borderColor || '#ffffff';
+            document.getElementById('subtitle-borderColorText').value = styles.borderColor || '#ffffff';
+            document.getElementById('subtitle-letterSpacingMV').value = styles.letterSpacingMV || 0.05;
+            document.getElementById('subtitle-letterSpacingAudio').value = styles.letterSpacingAudio || 0.08;
+        }
+        
+        async function saveSubtitle() {
+            try {
+                const data = {
+                    fontSize: parseInt(document.getElementById('subtitle-fontSize').value),
+                    fontSizeMobile: parseInt(document.getElementById('subtitle-fontSizeMobile').value),
+                    fontSizeFullscreen: parseInt(document.getElementById('subtitle-fontSizeFullscreen').value),
+                    unsungColor: document.getElementById('subtitle-unsungColor').value,
+                    sungColor: document.getElementById('subtitle-sungColor').value,
+                    borderColor: document.getElementById('subtitle-borderColor').value,
+                    letterSpacingMV: parseFloat(document.getElementById('subtitle-letterSpacingMV').value),
+                    letterSpacingAudio: parseFloat(document.getElementById('subtitle-letterSpacingAudio').value)
+                };
+                
+                await fetch('/api/config/subtitle', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                showToast('字幕設定已儲存！');
+            } catch (error) {
+                showToast('儲存失敗', false);
+            }
+        }
+        
+        // ========================================
+        // 通知設定
+        // ========================================
+        function renderNotifications() {
+            const notifications = config.notifications || {};
+            const telegram = notifications.telegram || {};
+            
+            document.getElementById('telegram-enabled').checked = telegram.enabled || false;
+            document.getElementById('telegram-botToken').value = telegram.botToken || '';
+            document.getElementById('telegram-chatId').value = telegram.chatId || '';
+        }
+        
+        async function saveNotifications() {
+            try {
+                const data = {
+                    telegram: {
+                        enabled: document.getElementById('telegram-enabled').checked,
+                        botToken: document.getElementById('telegram-botToken').value,
+                        chatId: document.getElementById('telegram-chatId').value
+                    }
+                };
+                
+                const response = await fetch('/api/config/notifications', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
                 
                 const result = await response.json();
-                
-                if (result.success) {
-                    showMessage('success', '✅ 設定已儲存');
-                } else {
-                    showMessage('error', '❌ 儲存失敗: ' + result.error);
-                }
+                showToast(result.message || '通知設定已儲存！', result.success);
             } catch (error) {
-                showMessage('error', '❌ 儲存失敗: ' + error.message);
+                showToast('儲存失敗', false);
             }
         }
         
-        // 重新載入
-        async function reloadConfig() {
-            await loadConfigs();
-            showMessage('success', '✅ 設定已重新載入');
-        }
-        
-        // 頁面載入
-        loadConfigs();
-        loadPrompts();
-        
-        // 載入提示詞
-        async function loadPrompts() {
+        async function testTelegram() {
             try {
-                // 載入 MV 提示詞
-                const mvRes = await fetch('/api/prompts/mv-matching');
-                if (mvRes.ok) {
-                    const mvData = await mvRes.json();
-                    document.getElementById('mvPrompt').value = mvData.content || '';
-                }
+                // 先儲存
+                await saveNotifications();
                 
-                // 載入語音提示詞
-                const audioRes = await fetch('/api/prompts/audio-matching');
-                if (audioRes.ok) {
-                    const audioData = await audioRes.json();
-                    document.getElementById('audioPrompt').value = audioData.content || '';
-                }
+                const response = await fetch('/api/config/notifications/test', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
                 
-                // 載入校正提示詞
-                const corrRes = await fetch('/api/prompts/correction');
-                if (corrRes.ok) {
-                    const corrData = await corrRes.json();
-                    document.getElementById('correctionPrompt').value = corrData.content || '';
-                }
+                const result = await response.json();
+                showToast(result.message, result.success);
             } catch (error) {
-                console.error('載入提示詞失敗:', error);
+                showToast('測試失敗: ' + error.message, false);
             }
         }
         
-        // 儲存通知設定
-        async function saveNotifyConfig() {
-            const data = {
-                ...configs.notifications,
-                channels: {
-                    ...configs.notifications?.channels,
-                    telegram: {
-                        enabled: document.getElementById('telegramEnabled').checked,
-                        botToken: document.getElementById('telegramBotToken').value,
-                        chatId: document.getElementById('telegramChatId').value,
-                        parseMode: 'HTML'
-                    },
-                    email: {
-                        enabled: document.getElementById('emailEnabled').checked,
-                        provider: 'smtp',
-                        smtp: {
-                            host: document.getElementById('emailSmtpHost').value,
-                            port: 587,
-                            user: document.getElementById('emailSmtpUser').value,
-                            pass: document.getElementById('emailSmtpPass').value
+        // ========================================
+        // 工具函數
+        // ========================================
+        function setupColorSync() {
+            // 顏色選擇器和文字輸入同步
+            ['unsung', 'sung', 'border'].forEach(type => {
+                const colorInput = document.getElementById(`subtitle-${type}Color`);
+                const textInput = document.getElementById(`subtitle-${type}ColorText`);
+                
+                if (colorInput && textInput) {
+                    colorInput.addEventListener('input', () => {
+                        textInput.value = colorInput.value;
+                    });
+                    textInput.addEventListener('input', () => {
+                        if (/^#[0-9A-Fa-f]{6}$/.test(textInput.value)) {
+                            colorInput.value = textInput.value;
                         }
-                    }
+                    });
                 }
-            };
-            await saveConfig('notifications', data);
-        }
-        
-        // 測試通知
-        async function testNotify() {
-            try {
-                const response = await fetch('/api/notify/test', { method: 'POST' });
-                const result = await response.json();
-                if (result.success) {
-                    showMessage('success', '✅ 測試通知已發送');
-                } else {
-                    showMessage('error', '❌ 測試失敗: ' + result.error);
-                }
-            } catch (error) {
-                showMessage('error', '❌ 測試失敗: ' + error.message);
-            }
-        }
-        
-        // 儲存計算規則
-        async function saveRulesConfig() {
-            const data = {
-                ...configs['subtitle-rules'],
-                timing: {
-                    charEstimateTime: parseFloat(document.getElementById('charEstimateTime').value),
-                    bufferTime: parseFloat(document.getElementById('bufferTime').value),
-                    maxDuration: parseFloat(document.getElementById('maxDuration').value),
-                    mvGapThreshold: parseFloat(document.getElementById('mvGapThreshold').value),
-                    audioGapThreshold: parseFloat(document.getElementById('audioGapThreshold').value),
-                    lastCharExtend: configs['subtitle-rules']?.timing?.lastCharExtend || 1.0,
-                    syncOffset: configs['subtitle-rules']?.timing?.syncOffset || 0
-                },
-                lineBreaking: {
-                    mv: {
-                        minChars: parseInt(document.getElementById('mvMinChars').value),
-                        maxChars: parseInt(document.getElementById('mvMaxChars').value)
-                    },
-                    audio: {
-                        minChars: parseInt(document.getElementById('audioMinChars').value),
-                        maxChars: parseInt(document.getElementById('audioMaxChars').value)
-                    },
-                    preferSentenceEnd: true,
-                    breakOnPunctuation: configs['subtitle-rules']?.lineBreaking?.breakOnPunctuation || []
-                }
-            };
-            await saveConfig('subtitle-rules', data);
-        }
-        
-        // 儲存 Ragic 設定
-        async function saveRagicConfig() {
-            const data = {
-                ...configs.ragic,
-                connection: {
-                    ...configs.ragic?.connection,
-                    baseUrl: document.getElementById('ragicBaseUrl').value,
-                    account: document.getElementById('ragicAccount').value,
-                    apiKey: document.getElementById('ragicApiKey').value
-                },
-                n8nWebhook: {
-                    fetchData: document.getElementById('n8nFetchUrl').value,
-                    uploadJson: document.getElementById('n8nUploadUrl').value
-                }
-            };
-            await saveConfig('ragic', data);
-        }
-        
-        // 儲存地區設定
-        async function saveRegionConfig() {
-            const regions = ['台灣', '香港', '澳門', '新加坡', '馬來西亞', '中國大陸'];
-            const data = {
-                ...configs['region-apis'],
-                mv: {
-                    ...configs['region-apis']?.mv,
-                    regions: {}
-                },
-                audio: {
-                    ...configs['region-apis']?.audio,
-                    regions: {}
-                }
-            };
-            
-            regions.forEach(region => {
-                const mvSelect = document.getElementById('mvRegion_' + region);
-                const audioSelect = document.getElementById('audioRegion_' + region);
-                if (mvSelect) data.mv.regions[region] = mvSelect.value;
-                if (audioSelect) data.audio.regions[region] = audioSelect.value;
             });
+        }
+        
+        function showToast(message, success = true) {
+            const toast = document.getElementById('saveToast');
+            toast.textContent = success ? `✅ ${message}` : `❌ ${message}`;
+            toast.style.background = success ? '#4caf50' : '#f44336';
+            toast.classList.add('show');
             
-            await saveConfig('region-apis', data);
-        }
-        
-        // 儲存提示詞
-        async function savePromptsConfig() {
-            try {
-                // 儲存 MV 提示詞
-                await fetch('/api/prompts/mv-matching', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: document.getElementById('mvPrompt').value })
-                });
-                
-                // 儲存語音提示詞
-                await fetch('/api/prompts/audio-matching', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: document.getElementById('audioPrompt').value })
-                });
-                
-                // 儲存校正提示詞
-                await fetch('/api/prompts/correction', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ content: document.getElementById('correctionPrompt').value })
-                });
-                
-                showMessage('success', '✅ 提示詞已儲存');
-            } catch (error) {
-                showMessage('error', '❌ 儲存失敗: ' + error.message);
-            }
-        }
-        
-        // 恢復預設提示詞
-        async function resetPrompts() {
-            if (!confirm('確定要恢復預設提示詞嗎？目前的設定將被覆蓋。')) return;
-            
-            try {
-                await fetch('/api/prompts/reset', { method: 'POST' });
-                await loadPrompts();
-                showMessage('success', '✅ 已恢復預設提示詞');
-            } catch (error) {
-                showMessage('error', '❌ 恢復失敗: ' + error.message);
-            }
-        }
-        
-        // 編輯 API（佔位）
-        function editApi(type, id) {
-            alert('API 編輯功能開發中...\n\n目前請直接編輯設定檔或使用匯入/匯出功能。');
-        }
-        
-        // 編輯模型（佔位）
-        function editModel(id) {
-            alert('模型編輯功能開發中...\n\n目前請直接編輯設定檔或使用匯入/匯出功能。');
-        }
-        
-        // ==================== 匯出/匯入功能 ====================
-        
-        // 匯出設定
-        async function exportSettings() {
-            const choice = confirm('請選擇匯出格式：\n\n確定 = 下載 HTML 檔案（包含所有設定，可離線查看）\n取消 = 下載 JSON 檔案（用於匯入還原）');
-            
-            if (choice) {
-                // 下載 HTML
-                window.location.href = '/api/export/html';
-                showMessage('success', '✅ 正在下載 HTML 設定備份...');
-            } else {
-                // 下載 JSON
-                window.location.href = '/api/export/json';
-                showMessage('success', '✅ 正在下載 JSON 設定備份...');
-            }
-        }
-        
-        // 顯示匯入對話框
-        function showImportDialog() {
-            document.getElementById('importDialog').style.display = 'block';
-            document.getElementById('importJson').value = '';
-        }
-        
-        // 隱藏匯入對話框
-        function hideImportDialog() {
-            document.getElementById('importDialog').style.display = 'none';
-        }
-        
-        // 處理檔案選擇
-        function handleImportFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('importJson').value = e.target.result;
-            };
-            reader.readAsText(file);
-        }
-        
-        // 執行匯入
-        async function doImport() {
-            const jsonText = document.getElementById('importJson').value.trim();
-            
-            if (!jsonText) {
-                alert('請貼上 JSON 內容或選擇檔案');
-                return;
-            }
-            
-            try {
-                const data = JSON.parse(jsonText);
-                
-                if (!data.configs) {
-                    alert('❌ 無效的設定格式，請確認是從「匯出設定」下載的檔案');
-                    return;
-                }
-                
-                if (!confirm(`確定要匯入設定嗎？\n\n這將覆蓋現有的 ${Object.keys(data.configs).length} 個設定檔。\n（現有設定會自動備份）`)) {
-                    return;
-                }
-                
-                const response = await fetch('/api/import/json', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: jsonText
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    hideImportDialog();
-                    showMessage('success', '✅ 設定已匯入！頁面將重新載入...');
-                    setTimeout(() => location.reload(), 1500);
-                } else {
-                    showMessage('error', '❌ 匯入失敗: ' + result.error);
-                }
-                
-            } catch (error) {
-                alert('❌ JSON 格式錯誤: ' + error.message);
-            }
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
     </script>
 </body>

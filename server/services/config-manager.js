@@ -1,8 +1,6 @@
 /**
- * 設定管理器 - 統一管理所有設定檔
- * 支援熱更新、合併預設值、設定保護
- * 
- * 🔒 重要：設定檔在 Volume 掛載目錄，重新部署不會清空
+ * SoulTalk V2 設定管理器
+ * 管理所有設定：MBTI 顏色、通知、圖片分類關鍵字等
  */
 
 const fs = require('fs');
@@ -10,333 +8,395 @@ const path = require('path');
 
 class ConfigManager {
     constructor() {
-        // 設定檔路徑（Volume 掛載，重新部署不會清空）
-        this.configPath = process.env.CONFIG_PATH || '/app/data/config';
-        
-        // 預設值路徑（程式碼內，會被更新覆蓋）
-        this.defaultsPath = path.join(__dirname, '../../data/config');
-        
-        // 備份路徑
-        this.backupPath = process.env.BACKUP_PATH || '/app/data/backups';
-        
-        this.cache = {};
-        this.watchers = {};
-        
-        // 確保目錄存在
-        this.ensureDirectories();
+        this.configPath = process.env.CONFIG_PATH || path.join(__dirname, '../../data/config');
+        this.ensureConfigDir();
+        this.loadAllConfigs();
     }
-    
-    /**
-     * 確保必要目錄存在
-     */
-    ensureDirectories() {
-        [this.configPath, this.backupPath].forEach(dir => {
-            if (!fs.existsSync(dir)) {
-                fs.mkdirSync(dir, { recursive: true });
-                console.log(`📁 建立目錄: ${dir}`);
-            }
-        });
+
+    ensureConfigDir() {
+        if (!fs.existsSync(this.configPath)) {
+            fs.mkdirSync(this.configPath, { recursive: true });
+        }
     }
-    
-    /**
-     * 載入設定檔（自動合併預設值，不覆蓋現有值）
-     * 
-     * 🔒 保護機制：
-     * 1. 如果 Volume 中已有設定 → 使用現有的（不覆蓋）
-     * 2. 如果 Volume 中沒有 → 從預設值複製
-     * 3. 如果有新增設定項目 → 只補充新項目，不改現有值
-     */
-    load(configName) {
-        const volumePath = path.join(this.configPath, `${configName}.json`);
-        const defaultPath = path.join(this.defaultsPath, `${configName}.json`);
-        
-        try {
-            // 讀取預設值
-            let defaults = {};
-            if (fs.existsSync(defaultPath)) {
-                defaults = JSON.parse(fs.readFileSync(defaultPath, 'utf8'));
-            }
-            
-            // 🔒 關鍵：檢查 Volume 中是否已有設定
-            if (fs.existsSync(volumePath)) {
-                // ✅ Volume 中有設定 → 使用現有的
-                const current = JSON.parse(fs.readFileSync(volumePath, 'utf8'));
-                console.log(`✅ 載入現有設定: ${configName}.json（不覆蓋）`);
-                
-                // 合併：保留現有值，只補充缺少的新項目
-                const merged = this.deepMerge(defaults, current);
-                
-                // 如果有新項目，更新檔案（但不改變現有值）
-                const hasNewItems = JSON.stringify(merged) !== JSON.stringify(current);
-                if (hasNewItems) {
-                    // 備份現有設定
-                    this.backup(configName, current);
-                    
-                    // 寫入合併後的設定
-                    merged._lastModified = new Date().toISOString();
-                    merged._version = (current._version || '1.0') + ' (updated)';
-                    fs.writeFileSync(volumePath, JSON.stringify(merged, null, 2));
-                    console.log(`📝 補充新設定項目: ${configName}.json`);
+
+    // ========================================
+    // 預設設定
+    // ========================================
+    getDefaultConfig() {
+        return {
+            // MBTI 背景顏色組別
+            mbtiColorGroups: {
+                male: [
+                    {
+                        id: 'male-1',
+                        name: '理性藍',
+                        colors: ['#1a1a2e', '#16213e', '#0f3460'],
+                        direction: 'to-bottom-right',
+                        assignedMBTI: ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'ISTJ', 'ISTP']
+                    },
+                    {
+                        id: 'male-2',
+                        name: '穩重綠',
+                        colors: ['#1b4332', '#2d6a4f', '#40916c'],
+                        direction: 'to-bottom',
+                        assignedMBTI: ['ISFJ', 'ESTJ', 'ESFJ', 'ISFP']
+                    },
+                    {
+                        id: 'male-3',
+                        name: '熱情紅',
+                        colors: ['#2d132c', '#6b0f1a', '#c72c41'],
+                        direction: 'to-right',
+                        assignedMBTI: ['ESTP', 'ESFP', 'ENFP', 'ENFJ', 'INFJ', 'INFP']
+                    }
+                ],
+                female: [
+                    {
+                        id: 'female-1',
+                        name: '溫柔粉',
+                        colors: ['#4a1942', '#7b2d5b', '#d4a5a5'],
+                        direction: 'to-bottom-right',
+                        assignedMBTI: ['INFP', 'INFJ', 'ENFP', 'ENFJ', 'ISFP', 'ESFP']
+                    },
+                    {
+                        id: 'female-2',
+                        name: '優雅紫',
+                        colors: ['#2c003e', '#512b58', '#7b2cbf'],
+                        direction: 'to-bottom',
+                        assignedMBTI: ['INTJ', 'INTP', 'ENTJ', 'ENTP', 'ISFJ', 'ISTJ']
+                    },
+                    {
+                        id: 'female-3',
+                        name: '清新藍',
+                        colors: ['#023e8a', '#0077b6', '#48cae4'],
+                        direction: 'to-right',
+                        assignedMBTI: ['ESTJ', 'ESFJ', 'ESTP', 'ISTP']
+                    }
+                ]
+            },
+
+            // MBTI 視覺參數（根據字母自動調整）
+            mbtiVisualParams: {
+                enabled: true,
+                // E/I 影響漸層方向
+                gradientByEI: true,
+                // T/F 影響星星數量
+                starsByTF: true,
+                starsT: 40,  // T 型較少星星
+                starsF: 80,  // F 型較多星星
+                // P/J 影響流星頻率
+                shootingByPJ: true,
+                shootingP: 5,  // P 型較多流星
+                shootingJ: 2   // J 型較少流星
+            },
+
+            // 專屬結尾設定
+            customEnding: {
+                enabled: true,
+                template: '這是屬於 {name} 的 {mbti} 專屬時刻',
+                fontSize: 28,
+                fontSizeMobile: 20,
+                duration: 8,  // 最後 8 秒顯示
+                fadeInDuration: 1.5,
+                fadeOutDuration: 2
+            },
+
+            // 圖片分類關鍵字
+            imageKeywords: {
+                full: 'header,封面,cover,主視覺,漫畫圖',
+                transparent: 'Q版,動作圖,人物,主人物,去背',
+                background: '漫畫圖1,漫畫圖2,漫畫圖3,漫畫圖',
+                static: '靜態,static,語音封面'
+            },
+
+            // 背景設定
+            backgroundSettings: {
+                mode: 'gradient',  // 'solid' 或 'gradient'
+                starryBg: true,
+                defaultColors: ['#1a1a2e', '#16213e', '#0f3460']
+            },
+
+            // 通知設定
+            notifications: {
+                telegram: {
+                    enabled: false,
+                    botToken: '',
+                    chatId: ''
+                },
+                n8n: {
+                    enabled: false,
+                    webhookUrl: ''
                 }
-                
-                this.cache[configName] = merged;
-                return merged;
-                
-            } else {
-                // ❌ Volume 中沒有 → 從預設值建立
-                console.log(`📝 建立設定檔（從預設值）: ${configName}.json`);
-                defaults._lastModified = new Date().toISOString();
-                fs.writeFileSync(volumePath, JSON.stringify(defaults, null, 2));
-                this.cache[configName] = defaults;
-                return defaults;
+            },
+
+            // 字幕設定
+            subtitleStyles: {
+                position: 'bottom',
+                fontSize: 28,
+                fontSizeMobile: 22,
+                fontSizeFullscreen: 36,
+                fontWeight: 700,
+                letterSpacingMV: 0.05,
+                letterSpacingAudio: 0.08,
+                unsungColor: '#ffffff',
+                sungColor: '#4d4d4d',
+                borderColor: '#ffffff'
+            },
+
+            // 標題設定
+            titleStyles: {
+                positionMV: 'center',
+                positionAudio: 'top',
+                fontSizeMV: 32,
+                fontSizeMVMobile: 24,
+                fontSizeMVFullscreen: 42,
+                fontSizeAudio: 34,
+                fontSizeAudioMobile: 25,
+                fontSizeAudioFullscreen: 43,
+                artistFontSize: 18,
+                offsetDesktopMV: 5,
+                offsetMobileMV: 3,
+                offsetFullscreenMV: 8,
+                offsetDesktopAudio: 5,
+                offsetMobileAudio: 3,
+                offsetFullscreenAudio: 8,
+                fadeOutDuration: 12
+            },
+
+            // 輪播設定
+            slideshowSettings: {
+                duration: 8,
+                transitionDuration: 300,
+                zoomMin: 1,
+                zoomMax: 1.15
             }
-            
-        } catch (error) {
-            console.error(`❌ 載入設定失敗 (${configName}):`, error.message);
-            return {};
-        }
+        };
     }
-    
-    /**
-     * 備份設定檔
-     */
-    backup(configName, data) {
-        try {
-            const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-            const backupFile = path.join(this.backupPath, `${configName}-${timestamp}.json`);
-            fs.writeFileSync(backupFile, JSON.stringify(data, null, 2));
-            console.log(`💾 備份設定: ${configName}-${timestamp}.json`);
-            
-            // 只保留最近 10 個備份
-            this.cleanOldBackups(configName);
-        } catch (error) {
-            console.error(`⚠️ 備份失敗 (${configName}):`, error.message);
-        }
-    }
-    
-    /**
-     * 清理舊備份（保留最近 10 個）
-     */
-    cleanOldBackups(configName) {
-        try {
-            const files = fs.readdirSync(this.backupPath)
-                .filter(f => f.startsWith(configName + '-') && f.endsWith('.json'))
-                .sort()
-                .reverse();
-            
-            // 刪除超過 10 個的備份
-            files.slice(10).forEach(file => {
-                fs.unlinkSync(path.join(this.backupPath, file));
-            });
-        } catch (error) {
-            // 忽略清理錯誤
-        }
-    }
-    
-    /**
-     * 儲存設定檔
-     */
-    save(configName, data) {
-        const filePath = path.join(this.configPath, `${configName}.json`);
+
+    // ========================================
+    // 載入/儲存設定
+    // ========================================
+    loadAllConfigs() {
+        const configFile = path.join(this.configPath, 'settings.json');
         
-        try {
-            // 備份現有設定
-            if (fs.existsSync(filePath)) {
-                const backupPath = path.join(this.configPath, `${configName}.backup.json`);
-                fs.copyFileSync(filePath, backupPath);
+        if (fs.existsSync(configFile)) {
+            try {
+                const saved = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+                this.config = this.mergeDeep(this.getDefaultConfig(), saved);
+                console.log('✅ 設定已載入:', configFile);
+            } catch (err) {
+                console.error('❌ 載入設定失敗:', err.message);
+                this.config = this.getDefaultConfig();
             }
-            
-            // 更新時間戳
-            data._lastModified = new Date().toISOString();
-            
-            // 儲存
-            fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
-            this.cache[configName] = data;
-            
-            console.log(`✅ 設定已儲存: ${configName}.json`);
+        } else {
+            this.config = this.getDefaultConfig();
+            this.saveAllConfigs();
+            console.log('✅ 已建立預設設定');
+        }
+    }
+
+    saveAllConfigs() {
+        const configFile = path.join(this.configPath, 'settings.json');
+        try {
+            fs.writeFileSync(configFile, JSON.stringify(this.config, null, 2), 'utf8');
+            console.log('✅ 設定已儲存:', configFile);
             return true;
-            
-        } catch (error) {
-            console.error(`❌ 儲存設定失敗 (${configName}):`, error.message);
+        } catch (err) {
+            console.error('❌ 儲存設定失敗:', err.message);
             return false;
         }
     }
-    
-    /**
-     * 取得設定（使用快取）
-     */
-    get(configName) {
-        if (!this.cache[configName]) {
-            this.load(configName);
+
+    // 深度合併物件
+    mergeDeep(target, source) {
+        const output = Object.assign({}, target);
+        if (this.isObject(target) && this.isObject(source)) {
+            Object.keys(source).forEach(key => {
+                if (this.isObject(source[key])) {
+                    if (!(key in target)) {
+                        Object.assign(output, { [key]: source[key] });
+                    } else {
+                        output[key] = this.mergeDeep(target[key], source[key]);
+                    }
+                } else {
+                    Object.assign(output, { [key]: source[key] });
+                }
+            });
         }
-        return this.cache[configName];
+        return output;
     }
-    
-    /**
-     * 重新載入設定（清除快取）
-     */
-    reload(configName) {
-        delete this.cache[configName];
-        return this.load(configName);
+
+    isObject(item) {
+        return (item && typeof item === 'object' && !Array.isArray(item));
     }
-    
-    /**
-     * 重新載入所有設定
-     */
-    reloadAll() {
-        const configNames = Object.keys(this.cache);
-        configNames.forEach(name => this.reload(name));
-        console.log('🔄 所有設定已重新載入');
+
+    // ========================================
+    // MBTI 顏色相關
+    // ========================================
+    getMBTIColorGroups() {
+        return this.config.mbtiColorGroups;
     }
-    
-    /**
-     * 深度合併物件（保留現有值）
-     */
-    deepMerge(defaults, current) {
-        const result = { ...current };
+
+    setMBTIColorGroups(groups) {
+        this.config.mbtiColorGroups = groups;
+        return this.saveAllConfigs();
+    }
+
+    // 根據性別和 MBTI 取得對應的顏色組
+    getColorsForMBTI(gender, mbti) {
+        const genderKey = gender === '女性' || gender === 'female' ? 'female' : 'male';
+        const groups = this.config.mbtiColorGroups[genderKey] || [];
         
-        for (const key of Object.keys(defaults)) {
-            // 跳過私有屬性（_開頭）
-            if (key.startsWith('_')) continue;
-            
-            if (!(key in result)) {
-                // 新項目，使用預設值
-                result[key] = defaults[key];
-            } else if (
-                typeof defaults[key] === 'object' && 
-                defaults[key] !== null &&
-                !Array.isArray(defaults[key])
-            ) {
-                // 遞迴合併物件
-                result[key] = this.deepMerge(defaults[key], result[key] || {});
+        for (const group of groups) {
+            if (group.assignedMBTI && group.assignedMBTI.includes(mbti)) {
+                return {
+                    colors: group.colors,
+                    direction: group.direction,
+                    groupName: group.name
+                };
             }
-            // 現有值保留不變
         }
         
-        return result;
-    }
-    
-    /**
-     * 監聽設定變更
-     */
-    watch(configName, callback) {
-        const filePath = path.join(this.configPath, `${configName}.json`);
-        
-        if (this.watchers[configName]) {
-            this.watchers[configName].close();
+        // 如果沒找到，返回第一組或預設
+        if (groups.length > 0) {
+            return {
+                colors: groups[0].colors,
+                direction: groups[0].direction,
+                groupName: groups[0].name
+            };
         }
-        
-        this.watchers[configName] = fs.watch(filePath, (eventType) => {
-            if (eventType === 'change') {
-                console.log(`🔄 設定變更: ${configName}.json`);
-                this.reload(configName);
-                callback(this.cache[configName]);
-            }
-        });
-    }
-    
-    /**
-     * 取得所有設定檔名稱
-     */
-    listConfigs() {
-        if (!fs.existsSync(this.configPath)) return [];
-        
-        return fs.readdirSync(this.configPath)
-            .filter(f => f.endsWith('.json') && !f.includes('.backup'))
-            .map(f => f.replace('.json', ''));
-    }
-    
-    /**
-     * 匯出所有設定（用於下載或備份）
-     */
-    exportAll() {
-        const configs = {};
-        const configNames = this.listConfigs();
-        
-        configNames.forEach(name => {
-            configs[name] = this.get(name);
-        });
         
         return {
-            _exportVersion: '2.0',
-            _exportTime: new Date().toISOString(),
-            _configCount: configNames.length,
-            configs
+            colors: this.config.backgroundSettings.defaultColors,
+            direction: 'to-bottom-right',
+            groupName: '預設'
         };
     }
-    
-    /**
-     * 匯入所有設定（從備份還原）
-     */
-    importAll(exportData) {
-        if (!exportData.configs) {
-            throw new Error('無效的匯出資料格式');
+
+    // 根據 MBTI 字母取得視覺參數
+    getVisualParamsForMBTI(mbti) {
+        const params = this.config.mbtiVisualParams;
+        if (!params.enabled || !mbti || mbti.length !== 4) {
+            return {
+                starCount: 60,
+                shootingCount: 3,
+                gradientDirection: 'to-bottom-right'
+            };
         }
-        
-        const results = [];
-        
-        for (const [name, data] of Object.entries(exportData.configs)) {
-            try {
-                // 備份現有設定
-                const current = this.get(name);
-                if (current && Object.keys(current).length > 0) {
-                    this.backup(name, current);
-                }
-                
-                // 儲存新設定
-                this.save(name, data);
-                results.push({ name, success: true });
-            } catch (error) {
-                results.push({ name, success: false, error: error.message });
-            }
+
+        const E_I = mbti[0];  // E 或 I
+        const S_N = mbti[1];  // S 或 N
+        const T_F = mbti[2];  // T 或 F
+        const J_P = mbti[3];  // J 或 P
+
+        let result = {
+            starCount: 60,
+            shootingCount: 3,
+            gradientDirection: 'to-bottom-right'
+        };
+
+        // E/I 影響漸層方向
+        if (params.gradientByEI) {
+            result.gradientDirection = E_I === 'E' ? 'to-bottom-right' : 'to-bottom';
         }
-        
-        return results;
+
+        // T/F 影響星星數量
+        if (params.starsByTF) {
+            result.starCount = T_F === 'T' ? params.starsT : params.starsF;
+        }
+
+        // P/J 影響流星頻率
+        if (params.shootingByPJ) {
+            result.shootingCount = J_P === 'P' ? params.shootingP : params.shootingJ;
+        }
+
+        return result;
     }
-    
-    /**
-     * 取得所有備份列表
-     */
-    listBackups() {
-        if (!fs.existsSync(this.backupPath)) return [];
-        
-        return fs.readdirSync(this.backupPath)
-            .filter(f => f.endsWith('.json'))
-            .map(f => ({
-                filename: f,
-                configName: f.split('-')[0],
-                timestamp: f.replace('.json', '').split('-').slice(1).join('-'),
-                path: path.join(this.backupPath, f)
-            }))
-            .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+
+    // ========================================
+    // 其他設定 Getter/Setter
+    // ========================================
+    getCustomEnding() {
+        return this.config.customEnding;
     }
-    
-    /**
-     * 從備份還原特定設定
-     */
-    restoreFromBackup(backupFilename) {
-        const backupFile = path.join(this.backupPath, backupFilename);
-        
-        if (!fs.existsSync(backupFile)) {
-            throw new Error(`備份檔案不存在: ${backupFilename}`);
-        }
-        
-        const configName = backupFilename.split('-')[0];
-        const data = JSON.parse(fs.readFileSync(backupFile, 'utf8'));
-        
-        // 備份當前設定
-        const current = this.get(configName);
-        if (current) {
-            this.backup(configName + '-before-restore', current);
-        }
-        
-        // 還原
-        this.save(configName, data);
-        return { configName, success: true };
+
+    setCustomEnding(settings) {
+        this.config.customEnding = { ...this.config.customEnding, ...settings };
+        return this.saveAllConfigs();
+    }
+
+    getImageKeywords() {
+        return this.config.imageKeywords;
+    }
+
+    setImageKeywords(keywords) {
+        this.config.imageKeywords = { ...this.config.imageKeywords, ...keywords };
+        return this.saveAllConfigs();
+    }
+
+    getBackgroundSettings() {
+        return this.config.backgroundSettings;
+    }
+
+    setBackgroundSettings(settings) {
+        this.config.backgroundSettings = { ...this.config.backgroundSettings, ...settings };
+        return this.saveAllConfigs();
+    }
+
+    getNotifications() {
+        return this.config.notifications;
+    }
+
+    setNotifications(settings) {
+        this.config.notifications = this.mergeDeep(this.config.notifications, settings);
+        return this.saveAllConfigs();
+    }
+
+    getSubtitleStyles() {
+        return this.config.subtitleStyles;
+    }
+
+    setSubtitleStyles(styles) {
+        this.config.subtitleStyles = { ...this.config.subtitleStyles, ...styles };
+        return this.saveAllConfigs();
+    }
+
+    getTitleStyles() {
+        return this.config.titleStyles;
+    }
+
+    setTitleStyles(styles) {
+        this.config.titleStyles = { ...this.config.titleStyles, ...styles };
+        return this.saveAllConfigs();
+    }
+
+    getSlideshowSettings() {
+        return this.config.slideshowSettings;
+    }
+
+    setSlideshowSettings(settings) {
+        this.config.slideshowSettings = { ...this.config.slideshowSettings, ...settings };
+        return this.saveAllConfigs();
+    }
+
+    getMBTIVisualParams() {
+        return this.config.mbtiVisualParams;
+    }
+
+    setMBTIVisualParams(params) {
+        this.config.mbtiVisualParams = { ...this.config.mbtiVisualParams, ...params };
+        return this.saveAllConfigs();
+    }
+
+    // 取得所有設定
+    getAllConfig() {
+        return this.config;
+    }
+
+    // 更新所有設定
+    updateConfig(newConfig) {
+        this.config = this.mergeDeep(this.config, newConfig);
+        return this.saveAllConfigs();
     }
 }
 
-// 單例模式
-const configManager = new ConfigManager();
-
-module.exports = configManager;
+module.exports = new ConfigManager();

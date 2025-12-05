@@ -1,0 +1,193 @@
+{
+  "mbtiColorGroups": {
+    "male": [
+      {
+        "id": "male-1",
+        "name": "理性藍",
+        "colors": [
+          "#1a1a2e",
+          "#16213e",
+          "#0f3460"
+        ],
+        "direction": "to-bottom-right",
+        "assignedMBTI": [
+          "INTJ",
+          "INTP",
+          "ENTJ",
+          "ENTP",
+          "ISTJ",
+          "ISTP"
+        ]
+      },
+      {
+        "id": "male-2",
+        "name": "穩重綠",
+        "colors": [
+          "#1b4332",
+          "#2d6a4f",
+          "#40916c"
+        ],
+        "direction": "to-bottom",
+        "assignedMBTI": [
+          "ISFJ",
+          "ESTJ",
+          "ESFJ",
+          "ISFP"
+        ]
+      },
+      {
+        "id": "male-3",
+        "name": "熱情紅",
+        "colors": [
+          "#2d132c",
+          "#6b0f1a",
+          "#c72c41"
+        ],
+        "direction": "to-right",
+        "assignedMBTI": [
+          "ESTP",
+          "ESFP",
+          "ENFP",
+          "ENFJ",
+          "INFJ",
+          "INFP"
+        ]
+      }
+    ],
+    "female": [
+      {
+        "id": "female-1",
+        "name": "溫柔粉",
+        "colors": [
+          "#4a1942",
+          "#7b2d5b",
+          "#d4a5a5"
+        ],
+        "direction": "to-bottom-right",
+        "assignedMBTI": [
+          "INFP",
+          "INFJ",
+          "ENFP",
+          "ENFJ",
+          "ISFP",
+          "ESFP"
+        ]
+      },
+      {
+        "id": "female-2",
+        "name": "優雅紫",
+        "colors": [
+          "#2c003e",
+          "#512b58",
+          "#7b2cbf"
+        ],
+        "direction": "to-bottom",
+        "assignedMBTI": [
+          "INTJ",
+          "INTP",
+          "ENTJ",
+          "ENTP",
+          "ISFJ",
+          "ISTJ"
+        ]
+      },
+      {
+        "id": "female-3",
+        "name": "清新藍",
+        "colors": [
+          "#023e8a",
+          "#0077b6",
+          "#48cae4"
+        ],
+        "direction": "to-right",
+        "assignedMBTI": [
+          "ESTJ",
+          "ESFJ",
+          "ESTP",
+          "ISTP"
+        ]
+      }
+    ]
+  },
+  "mbtiVisualParams": {
+    "enabled": true,
+    "gradientByEI": true,
+    "starsByTF": true,
+    "starsT": 40,
+    "starsF": 80,
+    "shootingByPJ": true,
+    "shootingP": 5,
+    "shootingJ": 2
+  },
+  "customEnding": {
+    "enabled": true,
+    "template": "這是屬於 {name} 的 {mbti} 專屬時刻",
+    "fontSize": 28,
+    "fontSizeMobile": 20,
+    "duration": 8,
+    "fadeInDuration": 1.5,
+    "fadeOutDuration": 2
+  },
+  "imageKeywords": {
+    "full": "header,封面,cover,主視覺,漫畫圖",
+    "transparent": "Q版,動作圖,人物,主人物,去背",
+    "background": "漫畫圖1,漫畫圖2,漫畫圖3,漫畫圖",
+    "static": "靜態,static,語音封面"
+  },
+  "backgroundSettings": {
+    "mode": "gradient",
+    "starryBg": true,
+    "defaultColors": [
+      "#1a1a2e",
+      "#16213e",
+      "#0f3460"
+    ]
+  },
+  "notifications": {
+    "telegram": {
+      "enabled": false,
+      "botToken": "",
+      "chatId": ""
+    },
+    "n8n": {
+      "enabled": false,
+      "webhookUrl": ""
+    }
+  },
+  "subtitleStyles": {
+    "position": "bottom",
+    "fontSize": 28,
+    "fontSizeMobile": 22,
+    "fontSizeFullscreen": 36,
+    "fontWeight": 700,
+    "letterSpacingMV": 0.05,
+    "letterSpacingAudio": 0.08,
+    "unsungColor": "#ffffff",
+    "sungColor": "#4d4d4d",
+    "borderColor": "#ffffff"
+  },
+  "titleStyles": {
+    "positionMV": "center",
+    "positionAudio": "top",
+    "fontSizeMV": 32,
+    "fontSizeMVMobile": 24,
+    "fontSizeMVFullscreen": 42,
+    "fontSizeAudio": 34,
+    "fontSizeAudioMobile": 25,
+    "fontSizeAudioFullscreen": 43,
+    "artistFontSize": 18,
+    "offsetDesktopMV": 5,
+    "offsetMobileMV": 3,
+    "offsetFullscreenMV": 8,
+    "offsetDesktopAudio": 5,
+    "offsetMobileAudio": 3,
+    "offsetFullscreenAudio": 8,
+    "fadeOutDuration": 12
+  },
+  "slideshowSettings": {
+    "duration": 8,
+    "transitionDuration": 300,
+    "zoomMin": 1,
+    "zoomMax": 1.15
+  }
+}

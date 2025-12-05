@@ -1,240 +1,296 @@
 /**
- * Ragic 整合服務
- * 處理與 Ragic 的資料讀寫，透過 N8N Webhook 或直接 API
+ * Ragic 客戶端
+ * 透過 N8N Webhook 取得 Ragic 資料
  */
 
 const fetch = require('node-fetch');
+const { fieldMappings, getFlatFieldIds } = require('./field-mappings');
 const configManager = require('../../services/config-manager');
 
 class RagicClient {
     constructor() {
-        this.config = configManager.get('ragic');
+        // N8N Webhook URLs
+        this.webhookUrls = {
+            fetch: 'https://app.notpro.cc/webhook/soultalk',
+            upload: 'https://app.notpro.cc/webhook/up-mv-json'
+        };
     }
-    
+
     /**
-     * 重新載入設定
-     */
-    reload() {
-        this.config = configManager.get('ragic');
-    }
-    
-    /**
-     * 透過 N8N Webhook 取得資料
+     * 根據代碼取得 Ragic 資料
+     * @param {string} code - Ragic 代碼
+     * @param {string} mode - 'mv' 或 'audio'
+     * @returns {Promise<object>} - 處理後的資料
      */
     async fetchByCode(code, mode = 'mv') {
-        this.reload();
-        
-        const webhookUrl = this.config.n8nWebhook.fetchData;
-        const url = `${webhookUrl}?idtool=${encodeURIComponent(code)}`;
-        
-        console.log(`📡 Ragic 查詢: ${code}`);
-        console.log(`📡 URL: ${url}`);
-        
+        console.log(`\n🔍 正在透過 N8N 查詢 Ragic 資料...`);
+        console.log(`  - 代碼: ${code}`);
+        console.log(`  - 模式: ${mode}`);
+
         try {
+            // 呼叫 N8N Webhook
+            const url = `${this.webhookUrls.fetch}?id=${encodeURIComponent(code)}`;
+            console.log(`  - URL: ${url}`);
+
             const response = await fetch(url);
             
             if (!response.ok) {
-                const error = await response.text();
-                throw new Error(`Ragic 查詢失敗 (${response.status}): ${error}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-            
+
             const rawData = await response.json();
-            
-            console.log('📦 Ragic 原始回應:', JSON.stringify(rawData, null, 2).substring(0, 500));
-            
-            // ✅ 處理 Ragic 返回的數據結構
-            // 格式: { "19": { "_ragicId": 19, "1005226": "姓名", ... } }
-            const keys = Object.keys(rawData);
-            if (keys.length === 0) {
-                throw new Error('找不到該代碼的資料');
-            }
-            
-            // 取第一個 key 的值作為記錄
-            const firstKey = keys[0];
-            const record = rawData[firstKey];
-            
-            console.log('🔑 記錄 Key:', firstKey);
-            console.log('📄 記錄欄位:', Object.keys(record).slice(0, 10));
-            
-            // 解析並映射欄位
-            return this.mapFields(record, mode);
-            
-        } catch (error) {
-            console.error(`❌ Ragic 查詢失敗:`, error.message);
-            throw error;
-        }
-    }
-    
-    /**
-     * 上傳 JSON 到 Ragic
-     */
-    async uploadJson(options) {
-        this.reload();
-        
-        const {
-            queryCode,
-            mvCode = '',
-            audioCode = '',
-            mode,
-            jsonData
-        } = options;
-        
-        const webhookUrl = this.config.n8nWebhook.uploadJson;
-        
-        const requestBody = {
-            id: queryCode,
-            'mv代碼': mvCode,
-            'mv-json': mode === 'mv' ? JSON.stringify(jsonData) : '',
-            'audio代碼': audioCode,
-            'audio-json': mode === 'audio' ? JSON.stringify(jsonData) : ''
-        };
-        
-        console.log(`📤 上傳到 Ragic...`);
-        console.log(`   - 模式: ${mode}`);
-        console.log(`   - 代碼: ${queryCode}`);
-        
-        try {
-            const response = await fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
-            
-            if (!response.ok) {
-                const error = await response.text();
-                throw new Error(`上傳失敗 (${response.status}): ${error}`);
-            }
-            
-            const result = await response.text();
-            console.log(`✅ 上傳成功`);
-            return { success: true, result };
-            
-        } catch (error) {
-            console.error(`❌ 上傳失敗:`, error.message);
-            throw error;
-        }
-    }
-    
-    /**
-     * 欄位映射 - 將 Ragic 資料轉換為應用格式
-     */
-    mapFields(rawData, mode) {
-        const fields = this.config.fields;
-        const result = {};
-        
-        // 除錯：顯示原始資料的部分欄位
-        console.log('🔍 原始資料欄位檢查:');
-        console.log('  - 姓名 (1005226):', rawData['1005226'] || rawData['姓名']);
-        console.log('  - 地區 (1005230):', rawData['1005230'] || rawData['地區']);
-        console.log('  - minimax音樂連結 (1005414):', rawData['1005414'] || rawData['minimax音樂連結']);
-        
-        // 通用欄位
-        result.code = this.getFieldValue(rawData, fields.code);
-        result.name = this.getFieldValue(rawData, fields.name);
-        result.region = this.getFieldValue(rawData, fields.region);
-        
-        if (mode === 'mv') {
-            // MV 模式欄位
-            result.audioUrl = this.getFieldValue(rawData, fields.minimaxMusicUrl);
-            result.mvCode = this.getFieldValue(rawData, fields.mvCode);
-            result.mvJson = this.getFieldValue(rawData, fields.mvJson);
-            
-            // MV 專用欄位（直接用名稱取值）
-            const mvFields = this.config.mvFields;
-            const fullImages = rawData[mvFields.fullImages] || '';
-            const transparentImages = rawData[mvFields.transparentImages] || '';
-            const wideImages = rawData[mvFields.wideImages] || '';
-            result.lyrics = rawData[mvFields.lyrics] || '';
-            result.songTitle = rawData[mvFields.songTitle] || '';
-            result.artist = rawData[mvFields.artist] || '';
-            
-            console.log('🎵 MV 欄位:');
-            console.log('  - 歌詞欄位名:', mvFields.lyrics, '值:', result.lyrics ? '有' : '無');
-            console.log('  - 封面圖欄位名:', mvFields.fullImages, '值:', fullImages ? '有' : '無');
-            
-            // 整合所有圖片到 images 陣列
-            result.images = [];
-            if (fullImages) {
-                const urls = fullImages.split(',').map(u => u.trim()).filter(u => u);
-                urls.forEach(url => result.images.push({ url, type: 'full' }));
-            }
-            if (transparentImages) {
-                const urls = transparentImages.split(',').map(u => u.trim()).filter(u => u);
-                urls.forEach(url => result.images.push({ url, type: 'transparent' }));
-            }
-            if (wideImages) {
-                const urls = wideImages.split(',').map(u => u.trim()).filter(u => u);
-                urls.forEach(url => result.images.push({ url, type: 'wide' }));
-            }
-            
-            // 保留原始欄位供其他用途
-            result.fullImages = fullImages;
-            result.transparentImages = transparentImages;
-            result.wideImages = wideImages;
-            
-        } else {
-            // 語音模式欄位
-            result.audioUrl = this.getFieldValue(rawData, fields.mp3Link0);
-            result.mergedAudioUrl = this.getFieldValue(rawData, fields.mp3Link1);
-            result.audioCode = this.getFieldValue(rawData, fields.audioCode);
-            result.audioJson = this.getFieldValue(rawData, fields.audioJson);
-            result.backgroundImage = this.getFieldValue(rawData, fields.mainCharacterImg);
-            result.transcript = this.getFieldValue(rawData, fields.soultalkTXT);
-            
-            console.log('🎙️ 語音欄位:');
-            console.log('  - 音頻 URL:', result.audioUrl ? '有' : '無');
-            console.log('  - 逐字稿:', result.transcript ? '有' : '無');
-            console.log('  - 背景圖:', result.backgroundImage ? '有' : '無');
-            
-            // 語音專用欄位
-            const audioFields = this.config.audioFields;
-            result.title = audioFields.title;
-            result.artistPrefix = audioFields.artistPrefix;
-            
-            // 整合圖片
-            result.images = [];
-            if (result.backgroundImage) {
-                const urls = result.backgroundImage.split(',').map(u => u.trim()).filter(u => u);
-                urls.forEach(url => result.images.push({ url, type: 'background' }));
-            }
-        }
-        
-        console.log(`📦 欄位映射完成:`, Object.keys(result).filter(k => result[k]).length, '個欄位有值');
-        console.log(`📷 圖片數量: ${result.images?.length || 0}`);
-        return result;
-    }
-    
-    /**
-     * 取得欄位值（支援 ID、名稱、別名）
-     */
-    getFieldValue(data, fieldConfig) {
-        if (!fieldConfig) return null;
-        
-        // 優先嘗試欄位 ID（Ragic 原始格式用 ID）
-        if (fieldConfig.id && data[fieldConfig.id]) {
-            return data[fieldConfig.id];
-        }
-        
-        // 嘗試欄位名稱
-        if (fieldConfig.name && data[fieldConfig.name]) {
-            return data[fieldConfig.name];
-        }
-        
-        // 嘗試別名
-        if (fieldConfig.aliases) {
-            for (const alias of fieldConfig.aliases) {
-                if (data[alias]) {
-                    return data[alias];
+            console.log(`  - 原始回應類型: ${typeof rawData}`);
+
+            // N8N Webhook 回傳格式: { "19": { "_ragicId": 19, "1005226": "姓名", ... } }
+            // 需要先提取第一個 key 的值
+            let recordData = rawData;
+            if (typeof rawData === 'object' && !Array.isArray(rawData)) {
+                const keys = Object.keys(rawData);
+                if (keys.length > 0 && rawData[keys[0]] && typeof rawData[keys[0]] === 'object') {
+                    recordData = rawData[keys[0]];
+                    console.log(`  - 提取記錄 ID: ${keys[0]}`);
                 }
             }
+
+            // 除錯：顯示原始資料欄位
+            this.debugRawData(recordData, mode);
+
+            // 轉換為應用程式格式
+            const result = this.transformData(recordData, mode);
+            
+            console.log(`\n✅ 資料載入成功`);
+            console.log(`  - 姓名: ${result.name || '(空)'}`);
+            console.log(`  - MBTI: ${result.mbti || '(空)'}`);
+            console.log(`  - 性別: ${result.gender || '(空)'}`);
+
+            return result;
+
+        } catch (error) {
+            console.error(`❌ 查詢失敗:`, error.message);
+            throw error;
+        }
+    }
+
+    /**
+     * 除錯：顯示原始資料欄位
+     */
+    debugRawData(rawData, mode) {
+        console.log('\n🔍 原始資料欄位檢查:');
+        
+        const common = fieldMappings.common;
+        for (const [key, field] of Object.entries(common)) {
+            const value = this.getFieldValue(rawData, field);
+            const status = value ? `✅ ${value}` : '❌ 空';
+            console.log(`  - ${field.name} (${field.id}): ${status}`);
+        }
+
+        const modeFields = fieldMappings[mode] || {};
+        console.log(`\n🎵 ${mode.toUpperCase()} 模式欄位映射:`);
+        
+        for (const [key, field] of Object.entries(modeFields)) {
+            if (field.id) {
+                const value = this.getFieldValue(rawData, field);
+                const status = value ? (value.length > 50 ? `有 (${value.length}字)` : value) : '❌ 空';
+                console.log(`  - ${key} (${field.id}): ${status}`);
+            }
+        }
+    }
+
+    /**
+     * 從原始資料取得欄位值
+     * @param {object} rawData - 原始資料
+     * @param {object} field - 欄位定義 { id, name }
+     * @returns {string|null} - 欄位值
+     */
+    getFieldValue(rawData, field) {
+        if (!rawData || !field) return null;
+        
+        // 優先用 ID 查詢
+        if (field.id && rawData[field.id] !== undefined) {
+            return rawData[field.id] || null;
         }
         
-        // 如果 fieldConfig 是字串，直接嘗試
-        if (typeof fieldConfig === 'string' && data[fieldConfig]) {
-            return data[fieldConfig];
+        // 備用：用名稱查詢
+        if (field.name && rawData[field.name] !== undefined) {
+            return rawData[field.name] || null;
         }
         
         return null;
+    }
+
+    /**
+     * 轉換資料為應用程式格式
+     */
+    transformData(rawData, mode) {
+        const common = fieldMappings.common;
+        const modeFields = fieldMappings[mode] || {};
+
+        // 基本資料
+        const result = {
+            // 通用欄位
+            name: this.getFieldValue(rawData, common.name),
+            gender: this.getFieldValue(rawData, common.gender),
+            mbti: this.getFieldValue(rawData, common.mbti),
+            region: this.getFieldValue(rawData, common.region),
+            ragicCode: this.getFieldValue(rawData, common.ragicCode),
+            mvCode: this.getFieldValue(rawData, common.mvCode),
+            audioCode: this.getFieldValue(rawData, common.audioCode),
+            
+            // 模式
+            mode: mode
+        };
+
+        if (mode === 'mv') {
+            // MV 模式專用
+            const minimaxUrl = this.getFieldValue(rawData, modeFields.minimaxMusicUrl);
+            const mp3Link2 = this.getFieldValue(rawData, modeFields.mp3Link2);
+            
+            result.audioUrl = minimaxUrl || mp3Link2;
+            result.minimaxUrl = minimaxUrl;  // 保留原始 minimax URL
+            result.songTitle = this.getFieldValue(rawData, modeFields.songTitle);
+            result.artist = this.getFieldValue(rawData, modeFields.artist);
+            result.lyrics = this.getFieldValue(rawData, modeFields.lyrics);
+            
+            // 處理圖片
+            result.images = this.extractImages(rawData, modeFields);
+            
+        } else if (mode === 'audio') {
+            // 語音模式專用
+            const audioUrl = this.getFieldValue(rawData, modeFields.audioUrl);
+            const mp3Link = this.getFieldValue(rawData, modeFields.mp3Link);
+            
+            result.audioUrl = audioUrl || mp3Link;
+            result.title = this.getFieldValue(rawData, modeFields.title);
+            result.speaker = this.getFieldValue(rawData, modeFields.speaker);
+            result.transcript = this.getFieldValue(rawData, modeFields.transcript);
+            result.coverImage = this.getFieldValue(rawData, modeFields.coverImage);
+        }
+
+        // 取得 MBTI 對應的顏色
+        if (result.gender && result.mbti) {
+            const colorInfo = configManager.getColorsForMBTI(result.gender, result.mbti);
+            result.bgColors = colorInfo.colors;
+            result.bgDirection = colorInfo.direction;
+            result.colorGroupName = colorInfo.groupName;
+            
+            // 取得視覺參數
+            const visualParams = configManager.getVisualParamsForMBTI(result.mbti);
+            result.visualParams = visualParams;
+        }
+
+        return result;
+    }
+
+    /**
+     * 提取並分類圖片
+     */
+    extractImages(rawData, modeFields) {
+        const images = {
+            full: [],
+            transparent: [],
+            background: [],
+            wide: [],
+            all: []
+        };
+
+        const keywords = configManager.getImageKeywords();
+        
+        // 定義關鍵字陣列
+        const keywordArrays = {
+            full: (keywords.full || '').split(',').map(k => k.trim().toLowerCase()).filter(k => k),
+            transparent: (keywords.transparent || '').split(',').map(k => k.trim().toLowerCase()).filter(k => k),
+            background: (keywords.background || '').split(',').map(k => k.trim().toLowerCase()).filter(k => k),
+            static: (keywords.static || '').split(',').map(k => k.trim().toLowerCase()).filter(k => k)
+        };
+
+        // 遍歷圖片欄位
+        for (let i = 1; i <= 10; i++) {
+            const imageField = modeFields.images?.[`image${i}`];
+            const titleField = modeFields.imageTitles?.[`title${i}`];
+            
+            const imageUrl = imageField ? this.getFieldValue(rawData, imageField) : null;
+            const imageTitle = titleField ? this.getFieldValue(rawData, titleField) : '';
+            
+            if (imageUrl) {
+                const titleLower = (imageTitle || '').toLowerCase();
+                let type = 'full';  // 預設為 full
+                
+                // 根據標題關鍵字分類
+                if (keywordArrays.transparent.some(k => titleLower.includes(k))) {
+                    type = 'transparent';
+                } else if (keywordArrays.background.some(k => titleLower.includes(k))) {
+                    type = 'background';
+                } else if (keywordArrays.static.some(k => titleLower.includes(k))) {
+                    type = 'full';  // static 歸類為 full
+                } else if (keywordArrays.full.some(k => titleLower.includes(k))) {
+                    type = 'full';
+                }
+                
+                const imageObj = {
+                    url: imageUrl,
+                    title: imageTitle,
+                    type: type,
+                    index: i
+                };
+                
+                images[type].push(imageObj);
+                images.all.push(imageObj);
+            }
+        }
+
+        console.log(`\n📷 圖片分類結果:`);
+        console.log(`  - Full: ${images.full.length} 張`);
+        console.log(`  - Transparent: ${images.transparent.length} 張`);
+        console.log(`  - Background: ${images.background.length} 張`);
+        console.log(`  - 總計: ${images.all.length} 張`);
+
+        return images;
+    }
+
+    /**
+     * 上傳 JSON 到 Ragic
+     */
+    async uploadJSON(data) {
+        console.log('\n📤 準備透過 N8N 上傳到 Ragic...');
+        
+        const { queryCode, mvCode, audioCode, mode, jsonData } = data;
+        
+        const requestBody = {
+            id: queryCode,
+            'mv代碼': mvCode || '',
+            'mv-json': mode === 'mv' ? JSON.stringify(jsonData) : '',
+            'audio代碼': audioCode || '',
+            'audio-json': mode === 'audio' ? JSON.stringify(jsonData) : ''
+        };
+
+        console.log(`  - 查詢代碼: ${queryCode}`);
+        console.log(`  - 模式: ${mode}`);
+        console.log(`  - mv代碼: ${mvCode || '(空)'}`);
+        console.log(`  - audio代碼: ${audioCode || '(空)'}`);
+        console.log(`  - JSON 大小: ${JSON.stringify(jsonData).length} bytes`);
+
+        try {
+            const response = await fetch(this.webhookUrls.upload, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP ${response.status}: ${errorText}`);
+            }
+
+            const result = await response.text();
+            console.log('✅ 上傳成功:', result);
+            return { success: true, message: result };
+
+        } catch (error) {
+            console.error('❌ 上傳失敗:', error.message);
+            throw error;
+        }
     }
 }
 
